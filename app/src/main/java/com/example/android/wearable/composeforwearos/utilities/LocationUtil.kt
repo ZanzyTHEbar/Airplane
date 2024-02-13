@@ -6,7 +6,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
 import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import com.example.android.wearable.composeforwearos.api.APIModel
@@ -15,10 +14,13 @@ import com.example.android.wearable.composeforwearos.data.Airport
 import com.example.android.wearable.composeforwearos.data.AirportDAO
 import com.example.android.wearable.composeforwearos.dto.AppCardData
 import com.example.android.wearable.composeforwearos.dto.NearestAirport
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit

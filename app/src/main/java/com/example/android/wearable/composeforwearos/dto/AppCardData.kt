@@ -1,7 +1,5 @@
 package com.example.android.wearable.composeforwearos.dto
 
-import android.location.Location
-
 data class AppCardData(
     val location: String,
     val temp: Int,

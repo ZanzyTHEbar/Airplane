@@ -1,6 +1,5 @@
 package com.example.android.wearable.composeforwearos.data
 
-import android.location.Location
 import com.example.android.wearable.composeforwearos.dto.AppCardData
 
 data class AirportsState(

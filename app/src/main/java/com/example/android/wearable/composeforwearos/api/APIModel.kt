@@ -1,7 +1,5 @@
 package com.example.android.wearable.composeforwearos.api
 
-import android.location.Location
-
 /*
 * This is the model class for the API
 * @description: This is an example of a response from the weather API

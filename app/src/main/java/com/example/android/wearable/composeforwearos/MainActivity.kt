@@ -26,8 +26,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.core.app.ActivityCompat
-import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.material.Scaffold
 import com.example.android.wearable.composeforwearos.compose.AirportScreen
 import com.example.android.wearable.composeforwearos.utilities.LocationUtil
 import com.google.android.gms.location.FusedLocationProviderClient

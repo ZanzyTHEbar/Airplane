@@ -1,9 +1,9 @@
 package com.example.android.wearable.composeforwearos.ui
 
-import androidx.compose.runtime.Composable
-import androidx.wear.compose.material3.MaterialTheme
-import androidx.wear.compose.material3.ExperimentalWearMaterial3Api
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.wear.compose.material3.ExperimentalWearMaterial3Api
+import androidx.wear.compose.material3.MaterialTheme
 
 @Composable
 @OptIn(ExperimentalWearMaterial3Api::class)
