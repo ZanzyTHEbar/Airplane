@@ -1,0 +1,46 @@
+Expected:
+TableInfo{
+    name='airports', 
+    columns={
+        longitudeDeg=Column{name='longitudeDeg', type='REAL', affinity='4', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        elevationFt=Column{name='elevationFt', type='REAL', affinity='4', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        continent=Column{name='continent', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        isoRegion=Column{name='isoRegion', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        gpsCode=Column{name='gpsCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        keywords=Column{name='keywords', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        ident=Column{name='ident', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        municipality=Column{name='municipality', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        wikipediaLink=Column{name='wikipediaLink', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        scheduledService=Column{name='scheduledService', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        type=Column{name='type', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        latitudeDeg=Column{name='latitudeDeg', type='REAL', affinity='4', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        iataCode=Column{name='iataCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        name=Column{name='name', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        homeLink=Column{name='homeLink', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        localCode=Column{name='localCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        id=Column{name='id', type='INTEGER', affinity='3', notNull=true, primaryKeyPosition=1, defaultValue='undefined'}, 
+        isoCountry=Column{name='isoCountry', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}}, foreignKeys=[], indices=[]}
+Found:
+TableInfo{
+    name='airports', 
+    columns={
+        id=Column{name='id', type='INTEGER', affinity='3', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        ident=Column{name='ident', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        type=Column{name='type', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        name=Column{name='name', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        latitudeDeg=Column{name='latitudeDeg', type='REAL', affinity='4', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        longitudeDeg=Column{name='longitudeDeg', type='REAL', affinity='4', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        elevationFt=Column{name='elevationFt', type='REAL', affinity='4', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        continent=Column{name='continent', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        isoCountry=Column{name='isoCountry', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        isoRegion=Column{name='isoRegion', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        municipality=Column{name='municipality', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        scheduledService=Column{name='scheduledService', type='TEXT', affinity='2', notNull=true, primaryKeyPosition=0, defaultValue='undefined'}, 
+        gpsCode=Column{name='gpsCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        iataCode=Column{name='iataCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        localCode=Column{name='localCode', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        homeLink=Column{name='homeLink', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        wikipediaLink=Column{name='wikipediaLink', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}, 
+        keywords=Column{name='keywords', type='TEXT', affinity='2', notNull=false, primaryKeyPosition=0, defaultValue='undefined'}}, foreignKeys=[], indices=[]}
+
+                                                                                                    	
