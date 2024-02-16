@@ -115,6 +115,10 @@ abstract class AirportDAO {
     abstract fun getAirportsOrderedByLocation(): Flow<List<Airport>>
 
     @Transaction
+    @Query("SELECT * FROM airports WHERE UPPER(ident) LIKE 'K%' ORDER BY latitudeDeg ASC, longitudeDeg ASC")
+    abstract fun getAirportsStartingWithKOrderedByLocation(): Flow<List<Airport>>
+
+    @Transaction
     @Query("SELECT * FROM airports WHERE ident = :icao")
     abstract fun getAirportByICAO(icao: String): Flow<Airport>
 
@@ -125,6 +129,20 @@ abstract class AirportDAO {
     @Transaction
     @Query("SELECT * FROM airports WHERE latitudeDeg BETWEEN :minLat AND :maxLat AND longitudeDeg BETWEEN :minLon AND :maxLon")
     abstract fun getAirportsByLocationsInRange(
+        minLat: Double,
+        maxLat: Double,
+        minLon: Double,
+        maxLon: Double
+    ): Flow<List<Airport>>
+
+    @Transaction
+    @Query("""
+    SELECT * FROM airports 
+    WHERE (UPPER(ident) LIKE 'K%') 
+    AND latitudeDeg BETWEEN :minLat AND :maxLat 
+    AND longitudeDeg BETWEEN :minLon AND :maxLon
+""")
+    abstract fun getAirportsByLocationsInRangeStartingWithK(
         minLat: Double,
         maxLat: Double,
         minLon: Double,

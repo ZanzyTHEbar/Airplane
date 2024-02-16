@@ -54,11 +54,7 @@ class LocationUtil(
     val locationData by lazy {
         mutableStateOf(
             AppCardData(
-                location = "",
-                temp = 0,
-                windDirection = 0,
-                windSpeed = 0,
-                time = ""
+                location = "", temp = 0, windDirection = 0, windSpeed = 0, time = ""
             )
         )
     }
@@ -85,8 +81,7 @@ class LocationUtil(
                     homeLink = "",
                     wikipediaLink = "",
                     keywords = ""
-                ),
-                distance = 0.0
+                ), distance = 0.0
             )
         )
     }
@@ -104,10 +99,9 @@ class LocationUtil(
     private fun distance(): Double {
         val dLat = Math.toRadians(loc2.latitude - loc1.latitude)  // deg2rad below
         val dLon = Math.toRadians(loc2.longitude - loc1.longitude)
-        val a =
-            sin(dLat / 2) * sin(dLat / 2) +
-                    cos(Math.toRadians(loc1.latitude)) * cos(Math.toRadians(loc2.latitude)) *
-                    sin(dLon / 2) * sin(dLon / 2)
+        val a = sin(dLat / 2) * sin(dLat / 2) + cos(Math.toRadians(loc1.latitude)) * cos(
+            Math.toRadians(loc2.latitude)
+        ) * sin(dLon / 2) * sin(dLon / 2)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return EARTH_RADIUS * c
     }
@@ -120,8 +114,7 @@ class LocationUtil(
      * range based on how wide a degree of longitude is at the user's current latitude.
      */
     private fun calculateLongitudeRangeAtLatitude(
-        latitude: Double,
-        desiredRangeKm: Double
+        latitude: Double, desiredRangeKm: Double
     ): Double {
         val radians = Math.toRadians(latitude)
         val widthPerDegree = cos(radians) * EARTH_RADIUS * (Math.PI / 180)
@@ -133,7 +126,7 @@ class LocationUtil(
         rangeKm: Double = 200.0,
     ) {
         val locations = potentialLocations.filter { airport ->
-            Log.v(TAG, "Potential Locations: $airport")
+            //Log.v(TAG, "Potential Locations: $airport")
             loc2.latitude = airport.latitudeDeg
             loc2.longitude = airport.longitudeDeg
             distance() <= rangeKm
@@ -143,11 +136,11 @@ class LocationUtil(
         nearbyLocations.clear()
         nearbyLocations.addAll(locations)
 
-        Log.d(TAG, "Nearby Locations: $nearbyLocations.")
+        /*Log.d(TAG, "Nearby Locations: $nearbyLocations.")
         Log.d(
             TAG,
             "Nearby Locations Size: ${nearbyLocations.size} - Potential Locations Size: ${potentialLocations.size}"
-        )
+        )*/
     }
 
     fun getNearbyLocation() {
@@ -156,22 +149,34 @@ class LocationUtil(
         val closestAirports = this.nearbyLocations.map {
             val lat = it.latitudeDeg
             val lon = it.longitudeDeg
-            val airPortLocation =
-                Location("Current Location").apply {
-                    latitude = lat
-                    longitude = lon
-                }
+            val airPortLocation = Location("Current Location").apply {
+                latitude = lat
+                longitude = lon
+            }
             val distance = airPortLocation.distanceTo(loc1)
 
-
             it to distance
-        }.sortedBy { it.second }
+        }.sortedBy {
+            // Sort by smallest distance first
+            it.second
+        }
         // TODO filter by type of airport
 
-        // filter to remove all airports that are closed, heliport, or small_airport
-        val filteredAirports = closestAirports.filter {
-            it.first.type != "closed" && it.first.type != "heliport" && it.first.type != "small_airport"
+        // filter to remove all airports that are closed, heliport, or have `Army` or `Air Force` or 'Navy' in the name
+        val filteredAirports = closestAirports.filterNot {
+            it.first.scheduledService == "no" || it.first.type == "heliport" || it.first.type == "closed"
+        }.filterNot {
+            it.first.name.contains("Army") || it.first.name.contains("Air Force") || it.first.name.contains(
+                "Navy"
+            )
         }
+
+        if (filteredAirports.isEmpty()) {
+            Log.e(TAG, "No airports found.")
+            return
+        }
+
+        Log.d(TAG, "Filtered Airports: $filteredAirports")
 
         val closestAirport = filteredAirports.first()
         val airport = closestAirport.first
@@ -179,8 +184,7 @@ class LocationUtil(
 
         nearestAirportLoaded.value = true
         nearestAirportData.value = NearestAirport(
-            nearestAirport = airport,
-            distance = distance.toDouble()
+            nearestAirport = airport, distance = distance.toDouble()
         )
     }
 
@@ -197,24 +201,19 @@ class LocationUtil(
     }
 
     fun createLocationRequest(
-        context: Context,
-        fusedLocationClient: FusedLocationProviderClient
+        context: Context, fusedLocationClient: FusedLocationProviderClient
     ) {
         //.setIntervalMillis(TimeUnit.SECONDS.toMillis(10))
         val locationRequest = LocationRequest.Builder(
             TimeUnit.SECONDS.toMillis(10)
-        )
-            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(5))
+        ).setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(5))
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(20))
-            .build()
+            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(20)).build()
 
         if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                context, Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                context, Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
@@ -240,11 +239,8 @@ class LocationUtil(
                     val (latRange, lonRange) = dbQuery()
 
                     // Get the airports within the range from the database
-                    dao.getAirportsByLocationsInRange(
-                        latRange.first,
-                        latRange.second,
-                        lonRange.first,
-                        lonRange.second
+                    dao.getAirportsByLocationsInRangeStartingWithK(
+                        latRange.first, latRange.second, lonRange.first, lonRange.second
                     ).collect { airports ->
                         findNearbyLocations(airports)
                         Log.d(TAG, "Airports from DB: $airports")
@@ -253,13 +249,23 @@ class LocationUtil(
                         val weatherDTO: List<APIModel>
 
                         nearestAirportData.value.nearestAirport.let {
-                            if (it.type == "small_airport") {
+                            // Check if nearestAirportData.value.nearestAirport is not null
+                            if (it.ident.isEmpty()) {
+                                Log.e(TAG, "Nearest Airport is null.")
+                                return@collect
+                            }
+
+                            weatherDTO = WeatherApi.apiInstance.getMetarDetails(
+                                it.ident, true, "json"
+                            )
+
+                            /*if (it.type == "small_airport") {
                                 Log.d(
                                     TAG,
                                     "Small Airports are not currently supported: ${it.ident}"
                                 )
                                 TODO()
-                                /*val lat = it.latitudeDeg
+                                *//*val lat = it.latitudeDeg
                                 val lon = it.longitudeDeg
 
                                 // Create bounding box around nearestLocationData
@@ -278,16 +284,10 @@ class LocationUtil(
                                         true,
                                         "json",
                                         "${minLat},${minLon},${maxLat},${maxLon}"
-                                    )*/
+                                    )*//*
                             } else {
-                                weatherDTO = WeatherApi
-                                    .apiInstance
-                                    .getMetarDetails(
-                                        it.ident,
-                                        true,
-                                        "json"
-                                    )
-                            }
+
+                            }*/
                         }
 
                         if (weatherDTO.isEmpty()) {
