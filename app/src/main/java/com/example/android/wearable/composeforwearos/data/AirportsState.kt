@@ -26,7 +26,7 @@ data class AirportsState(
         ),
         AppCardData(
             location = "",
-            temp = 0,
+            temp = 0.0,
             windDirection = 0,
             windSpeed = 0,
             time = ""

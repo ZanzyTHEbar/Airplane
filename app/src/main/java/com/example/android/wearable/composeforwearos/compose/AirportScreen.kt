@@ -123,6 +123,7 @@ fun AirportScreen(
                     )
                     if (!locationUtil.locationDataLoaded.value)
                         item {
+                            // TODO: Add a loading indicator
                             TextWidget(
                                 contentModifier,
                                 "Thanks! I can access your exact location :D"

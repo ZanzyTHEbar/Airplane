@@ -47,7 +47,7 @@ class MainViewModel(
     private val _weather = MutableStateFlow(
         AppCardData(
             location = "",
-            temp = 0,
+            temp = 0.0,
             windDirection = 0,
             windSpeed = 0,
             time = ""

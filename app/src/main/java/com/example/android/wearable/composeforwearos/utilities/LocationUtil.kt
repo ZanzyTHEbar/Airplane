@@ -54,7 +54,7 @@ class LocationUtil(
     val locationData by lazy {
         mutableStateOf(
             AppCardData(
-                location = "", temp = 0, windDirection = 0, windSpeed = 0, time = ""
+                location = "", temp = 0.0, windDirection = 0, windSpeed = 0, time = ""
             )
         )
     }
@@ -160,11 +160,11 @@ class LocationUtil(
             // Sort by smallest distance first
             it.second
         }
-        // TODO filter by type of airport
+        // TODO setup military filter to only be enabled if the setting is enabled
 
         // filter to remove all airports that are closed, heliport, or have `Army` or `Air Force` or 'Navy' in the name
         val filteredAirports = closestAirports.filterNot {
-            it.first.scheduledService == "no" || it.first.type == "heliport" || it.first.type == "closed"
+            it.first.type == "heliport"
         }.filterNot {
             it.first.name.contains("Army") || it.first.name.contains("Air Force") || it.first.name.contains(
                 "Navy"
@@ -205,10 +205,11 @@ class LocationUtil(
     ) {
         //.setIntervalMillis(TimeUnit.SECONDS.toMillis(10))
         val locationRequest = LocationRequest.Builder(
-            TimeUnit.SECONDS.toMillis(10)
-        ).setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(5))
+            TimeUnit.SECONDS.toMillis(30)
+        )
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(20)).build()
+            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(30))
+            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(5)).build()
 
         if (ActivityCompat.checkSelfPermission(
                 context, Manifest.permission.ACCESS_FINE_LOCATION
@@ -302,7 +303,7 @@ class LocationUtil(
                         locationDataLoaded.value = true
                         locationData.value = AppCardData(
                             location = location.toText(),
-                            temp = apiData.temp.roundToInt(),
+                            temp = apiData.temp,
                             windDirection = apiData.wdir,
                             windSpeed = apiData.wspd,
                             time = apiData.receiptTime

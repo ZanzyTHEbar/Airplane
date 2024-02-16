@@ -16,6 +16,7 @@
 package com.example.android.wearable.composeforwearos.compose
 
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material3.AppCard
@@ -69,9 +71,24 @@ fun ButtonWidget(
 }
 
 @Composable
-fun WeatherInfoItem(icon: ImageVector, infoText: String, color: Color? = null) {
+fun WeatherInfoItem(
+    icon: ImageVector? = null,
+    infoText: String,
+    color: Color? = null,
+    painter: Int? = null
+) {
     Column(modifier = Modifier.padding(8.dp)) {
-        Icon(imageVector = icon, contentDescription = null)
+
+        if (icon != null && painter == null) {
+            Icon(imageVector = icon, contentDescription = null)
+        } else {
+            Image(
+                modifier = Modifier.size(24.dp, 24.dp),
+                painter = painterResource(id = painter!!),
+                contentDescription = null
+            )
+        }
+
         Text(
             text = infoText,
             style = MaterialTheme.typography.bodyMedium,
@@ -115,7 +132,6 @@ fun CardWidget(
 
         val icon = if (appCardData.temp < 20.0) R.mipmap.cold else R.mipmap.hot
 
-        // TODO: Create a Column of rows for the temperature and wind details
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -123,42 +139,18 @@ fun CardWidget(
             verticalAlignment = Alignment.CenterVertically
         ) {
             WeatherInfoItem(
-                icon = Icons.Filled.Thermostat,
+                painter = icon,
                 infoText = "${appCardData.temp}°C",
                 color = if (appCardData.temp < 20) Color.Blue else Color.Red
             )
-            WeatherInfoItem(icon = Icons.Filled.Air, infoText = "${appCardData.windSpeed}km/h")
+            WeatherInfoItem(
+                icon = Icons.Filled.Air,
+                infoText = if (appCardData.windSpeed != 0) "${appCardData.windSpeed}kn" else "N/A"
+            )
             WeatherInfoItem(
                 icon = Icons.Filled.Explore,
-                infoText = "${appCardData.windDirection}°"
+                infoText = if (appCardData.windDirection != 0) "${appCardData.windDirection}°" else "N/A"
             )
-            /*Row {
-                Text(
-                    text = "Temperature: ${appCardData.temp}°C",
-                    color = if (appCardData.temp < 20) Color.Blue else Color.Red
-                )
-            }
-            Row {
-                Text(
-                    text = "Wind: ${appCardData.windSpeed} km/h",
-                )
-            }
-            Row {
-                Text(
-                    text = "Wind: ${appCardData.windDirection}°"
-                )
-            }
-            Row(horizontalArrangement = Arrangement.Center) {
-                Image(
-                    modifier = Modifier.height(20.dp),
-                    painter = painterResource(id = icon),
-                    contentDescription = "",
-                )
-                Spacer(modifier = Modifier.size(5.dp))
-                Text(
-                    text = "${appCardData.temp}°C"
-                )
-            }*/
         }
 
     }
