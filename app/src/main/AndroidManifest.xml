@@ -10,35 +10,37 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.hardware.type.watch" />
+    <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.location.network" />
 
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.BODY_SENSORS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name=".MainApplication"
+        android:name=".MainApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:directBootAware="true"
+        android:icon="@mipmap/airlines_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:theme="@android:style/Theme.DeviceDefault"
+        tools:targetApi="tiramisu">
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
 
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
         <meta-data
             android:name="com.google.android.wearable.standalone"
             android:value="true" />
@@ -47,32 +49,218 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAad7ur95Ghl5Drs15lMSq4xXfrx3sjy1w" />
 
-        <activity
-            android:name=".MainActivity"
+        <!--android:icon="@drawable/ic_watch_white"-->
+        <!--<service
+            android:name=".complications.TempComplicationService"
+            android:directBootAware="true"
             android:exported="true"
-            android:taskAffinity="">
+            android:label="@string/complications_label"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
             </intent-filter>
-            <!--<intent-filter>
 
-            </intent-filter>-->
-        </activity>
-        <!-- <service
-            android:name=".IncomingRequestWearService"
+            <meta-data
+                android:name="android.support.wearable.complications.SAFE_WATCH_FACES"
+                android:value="com.prometheontechnologies.aviationweatherwatchface.complication/com.prometheontechnologies.aviationweatherwatchface.complication.ComplicationService" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="RANGED_VALUE,SHORT_TEXT,LONG_TEXT" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+        </service>-->
+
+        <!--
+        <intent-filter>
+              <action android:name="com.prometheontechnologies.aviationweatherwatchface.complication.AVIATION_WEATHER_LOCATION_SERVICE" />
+        </intent-filter>
+        -->
+        <!--android:foregroundServiceType="location"-->
+        <service
+            android:name=".services.LocationUpdateService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="false"
+            android:permission="android.permission.ACCESS_BACKGROUND_LOCATION">
             <intent-filter>
-                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
-                <data android:scheme="wear" android:host="*" android:pathPrefix="/"/>
+                <action android:name="com.example.ACTION_START_LOCATION_UPDATES" />
             </intent-filter>
-        </service> -->
-    </application>
+        </service>
 
+        <service
+            android:name=".services.AirportService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <receiver
+            android:name=".receivers.RebootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <!--<receiver
+            android:name=".receivers.ReceiverService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="AVIATION_WEATHER_LOCATION_SERVICE" />
+            </intent-filter>
+        </receiver>-->
+
+        <!--android:icon="@android:drawable/distance"-->
+        <service
+            android:name=".complications.DistanceComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_distance"
+            android:label="@string/distance_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name=".complications.IDENTComplicationService"
+            android:exported="true"
+            android:icon="@drawable/baseline_badge_24"
+            android:label="@string/ident_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name=".complications.TempComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_temp"
+            android:label="@string/temp_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name=".complications.TimeComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_clock"
+            android:label="@string/time_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name=".complications.WindComplicationService"
+            android:exported="true"
+            android:icon="@drawable/wind_foreground"
+            android:label="@string/wind_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="60" />
+
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+    </application>
 </manifest>
+
+    <!--<activity
+                android:name="android.support.wearable.complications.ComplicationHelperActivity"
+                android:taskAffinity="" />
+
+            <activity
+                android:name=".DigitalWatchFaceWearableConfigActivity"
+                android:exported="true"
+                android:label="@string/digital_config_name"
+                android:taskAffinity="">
+                <intent-filter>
+                    <action android:name="androidx.wear.watchface.editor.action.WATCH_FACE_EDITOR" />
+
+                    <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                </intent-filter>
+            </activity>
+
+            <activity
+                android:name=".ComplicationConfigActivity"
+                android:exported="true"
+                android:label="@string/config_complications_name"
+                android:taskAffinity="">
+                <intent-filter>
+                    <action android:name="com.example.android.wearable.composeforwearos.CONFIG_COMPLICATIONS" />
+
+                    <category android:name="com.example.android.wearable.composeforwearos.category.WEARABLE_CONFIGURATION" />
+                    <category android:name="android.intent.category.DEFAULT" />
+                </intent-filter>
+            </activity>
+
+            <activity
+                android:name=".MainActivity"
+                android:exported="true"
+                android:taskAffinity="">
+                <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+            </activity>-->
+
+    <!-- <service
+        android:name=".IncomingRequestWearService"
+        android:enabled="true"
+        android:exported="true" >
+        <intent-filter>
+            <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+            <data android:scheme="wear" android:host="*" android:pathPrefix="/"/>
+        </intent-filter>
+    </service> -->

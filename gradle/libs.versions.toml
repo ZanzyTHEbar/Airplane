@@ -1,27 +1,23 @@
 [versions]
-accompanist-permissions = "0.25.0"
 activity-compose = "1.8.2"
 androidx-junit = "1.1.5"
-compose-material = "1.3.0"
 constraintlayout = "2.1.4"
 core-ktx = "1.12.0"
+datastore = "1.0.0"
 gradle = "8.2.2"
 junit = "4.13.2"
 kotlin-stdlib = "1.9.22"
 androidx-activity = "1.8.2"
-androidx-lifecycle = "2.5.1"
-androidx-test = "1.4.0"
-androidx-wear-compose = "1.2.0-beta02"
-androidx-wear-tiles = "1.1.0"
-androidx-wear-watchface = "1.0.1"
+androidx-wear-watchface = "1.3.0-alpha01"
 compose-material3 = "1.0.0-alpha17"
+kotlinGradlePlugin = "1.8.21"
+kotlinxCollectionsImmutable = "0.3.5"
+kotlinxSerializationJson = "1.6.2"
 ktorClientAndroid = "2.3.8"
+lifecycleService = "2.7.0"
 material = "1.11.0"
 materialIconsExtended = "1.7.0-alpha02"
-okhttp = "5.0.0-alpha.2"
 play-services-location = "21.1.0"
-coroutines = "1.8.0-RC2"
-play-services-places = "17.0.0"
 retrofit = "2.9.0"
 room-runtime = "2.6.1"
 databinding-common = "8.2.2"
@@ -40,7 +36,7 @@ ksp = "1.9.22-1.0.17"
 # @keep
 lifecycle = "2.7.0"
 # @keep
-minSdk = "26"
+minSdk = "29"
 monitor = "1.6.1"
 pagingCompose = "3.3.0-alpha03"
 profileInstaller = "1.3.1"
@@ -48,10 +44,11 @@ spotless = "6.25.0"
 # @keep
 targetSdk = "33"
 uiTestJunit4 = "1.7.0-alpha02"
+uiTooling = "1.6.1"
+uiToolingPreview = "1.6.1"
 version-catalog-update = "0.8.4"
 viewModelCompose = "2.7.0"
 work = "2.9.0"
-ben-manes-versions = "0.51.0"
 material3Android = "1.2.0"
 
 [libraries]
@@ -60,8 +57,12 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-activity-ktx = { module = "androidx.activity:activity-ktx", version.ref = "androidx-activity" }
 androidx-appcompat = "androidx.appcompat:appcompat:1.6.1"
 androidx-databinding-common = { group = "androidx.databinding", name = "databinding-common", version.ref = "databinding-common" }
+androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
+androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
+androidx-ui-toolingx = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 androidx-wearx = "androidx.wear:wear:1.3.0"
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-compose-wear-foundation = { module = "androidx.wear.compose:compose-foundation", version = "1.4.0-alpha02" }
@@ -100,11 +101,14 @@ gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 io-coil-kt = { module = "io.coil-kt:coil-compose", version = "2.1.0" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin-stdlib" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version = "coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "coroutines" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktorClientAndroid" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 okhttp3x = { module = "com.squareup.okhttp3:okhttp", version = "5.0.0-alpha.12" }
@@ -113,7 +117,15 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 playservices-wearable = "com.google.android.gms:play-services-wearable:18.1.0"
 retrofit2 = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
-
+wear-watchfacex = { module = "androidx.wear.watchface:watchface", version.ref = "androidx-wear-watchface" }
+wear-watchface-client = { module = "androidx.wear.watchface:watchface-client", version.ref = "androidx-wear-watchface" }
+wear-watchface-complications-datax = { module = "androidx.wear.watchface:watchface-complications-data", version.ref = "androidx-wear-watchface" }
+wear-watchface-complications-data-source = { module = "androidx.wear.watchface:watchface-complications-data-source", version.ref = "androidx-wear-watchface" }
+wear-watchface-complications-rendering = { module = "androidx.wear.watchface:watchface-complications-rendering", version.ref = "androidx-wear-watchface" }
+wear-watchface-data = { module = "androidx.wear.watchface:watchface-data", version.ref = "androidx-wear-watchface" }
+wear-watchface-editor = { module = "androidx.wear.watchface:watchface-editor", version.ref = "androidx-wear-watchface" }
+wear-watchface-style = { module = "androidx.wear.watchface:watchface-style", version.ref = "androidx-wear-watchface" }
+androidx-watchface-complications-data-source-ktx = { group = "androidx.wear.watchface", name = "watchface-complications-data-source-ktx", version.ref = "androidx-wear-watchface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -124,4 +136,3 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }
 kserialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "ben-manes-versions" }

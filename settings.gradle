@@ -29,6 +29,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "Compose for Wear OS Code Lab"
+rootProject.name = "Aviation Weather Watchface"
 //include ':start', ':finished'
 include ':app'

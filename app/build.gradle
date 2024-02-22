@@ -19,13 +19,14 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    id 'kotlin-parcelize'
 }
 
 android {
     compileSdk libs.versions.compileSdk.get().toInteger()
 
     defaultConfig {
-        applicationId "com.example.android.wearable.composeforwearos"
+        applicationId "com.prometheontechnologies.aviationweatherwatchface.complication"
         minSdk libs.versions.minSdk.get().toInteger()
         targetSdk libs.versions.targetSdk.get().toInteger()
         ksp {
@@ -68,7 +69,8 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
-    namespace 'com.example.android.wearable.composeforwearos'
+    //Aviation Weather Watchface
+    namespace 'com.prometheontechnologies.aviationweatherwatchface.complication'
 }
 
 
@@ -111,7 +113,7 @@ dependencies {
 
     // General Compose dependencies
     // Compose for Wear OS Dependencies
-    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+    implementation libs.androidx.ui.tooling.preview
     implementation libs.androidx.material.icons.extended
     implementation libs.androidx.activity.compose
     implementation libs.androidx.compose.wear.foundation
@@ -128,18 +130,35 @@ dependencies {
     implementation libs.androidx.paging.compose
     implementation platform(libs.androidx.compose.bom)
 
+    // Watchface dependencies
+    implementation libs.wear.watchfacex
+    implementation libs.wear.watchface.complications.datax
+    implementation libs.wear.watchface.complications.data.source
+    implementation libs.wear.watchface.client
+    implementation libs.wear.watchface.complications.rendering
+    implementation libs.wear.watchface.data
+    implementation libs.wear.watchface.editor
+    implementation libs.wear.watchface.style
+
     // Fs and data binding
-    implementation libs.androidx.room.runtime
     implementation libs.androidx.databinding.common
-    implementation libs.androidx.room.paging
-    implementation libs.androidx.room.ktx
     implementation libs.androidx.lifecycle.livedata.ktx
     implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.lifecycle.service
     implementation libs.ktor.client.android
     implementation libs.androidx.material3.android
+    //implementation libs.androidx.wear.complications.provider
+    implementation libs.androidx.watchface.complications.data.source.ktx
 
+    implementation libs.androidx.datastore
+    implementation libs.kotlinx.collections.immutable
+    implementation libs.kotlinx.serialization.json
+
+    // Room
+    implementation libs.androidx.room.runtime
+    implementation libs.androidx.room.paging
+    implementation libs.androidx.room.ktx
     ksp libs.androidx.room.compiler
-    //annotationProcessor libs.androidx.room.compiler
 
     // Testing and Debugging
     testImplementation libs.junit
@@ -151,7 +170,7 @@ dependencies {
     implementation libs.androidx.monitor
     implementation libs.androidx.work.testing
     androidTestImplementation libs.androidx.ui.test.junit4
-    debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+    debugImplementation libs.androidx.ui.toolingx
     testImplementation libs.androidx.room.testing
     androidTestImplementation libs.androidx.room.testing
     testImplementation libs.kotlinx.coroutines.test

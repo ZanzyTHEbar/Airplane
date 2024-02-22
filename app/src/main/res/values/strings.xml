@@ -12,7 +12,7 @@
      limitations under the License.
 -->
 <resources>
-    <string name="app_name">Airplane</string>
+    <string name="app_name">Aviation Weather Watchface</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.
@@ -20,6 +20,9 @@
     <string name="device_shape">Square Device</string>
     <string name="hello_world_starter">Hello, Compose World!</string>
     <string name="preference_file_key" />
+
+    <string name="location_service_notification_channel_id">aviation_weather_watchface_location_service</string>
+    <string name="complication_data_updated">com.prometheontechnologies.aviationweatherwatchface.AIRPORT_DATA_UPDATED</string>
 
     <string name="user_denied_remote_permission">User denied permission on remote device.</string>
     <string name="user_approved_remote_permission">User approved permission on remote device, requesting data again.</string>
@@ -31,4 +34,24 @@
     <string name="permission_message_activity_request_permission_on_phone">App requires access to your phone\'s information.</string>
     <string name="open_on_phone_message_activity_request_permission_on_phone">Open on phone</string>
     <string name="no_location_text">No location Data could be resolved</string>
+    <string name="digital_config_name">Config Screen</string>
+    <string name="digital_watch_face_name">Weather</string>
+    <string name="config_complications_name">Data Provider</string>
+    <string name="complications_label">Aviation Weather Watchface Data Provider</string>
+    <!-- Time Complication Preferences -->
+    <string name="time_comp_name">Time</string>
+    <string name="time_comp_desc">Current Time</string>
+    <string name="time_setting_leading_zero_title">Leading zero</string>
+    <string name="time_setting_leading_zero_summary_on" translatable="false">09:00</string>
+    <string name="time_setting_leading_zero_summary_off" translatable="false">9:00</string>
+
+    <string name="time_ampm_setting_preference_category_title">Time / Sun Complication</string>
+    <string name="time_ampm_setting_title">Hour Format</string>
+    <string name="time_ampm_setting_on">24h</string>
+    <string name="time_ampm_setting_off">12h</string>
+    <string name="distance_complication_name">Distance Complication Service</string>
+    <string name="ident_complication_name">IDENT Complication Service</string>
+    <string name="temp_complication_name">Temperature Complication Service</string>
+    <string name="time_complication_name">Zulu Time Complication Service</string>
+    <string name="wind_complication_name">Wind Complication Service</string>
 </resources>
