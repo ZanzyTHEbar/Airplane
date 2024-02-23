@@ -83,12 +83,17 @@ class LocationUpdateService : Service() {
     private suspend fun updateData(complicationData: ComplicationsDataStore) {
         Log.d(TAG, "Updating data and notifying complications")
         Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
-        applicationContext.complicationsDataStore.updateData {
-            it.copy(
-                complicationsDataStore = complicationData
-            )
+        applicationContext.complicationsDataStore.updateData { currentData ->
+            currentData.copy(complicationsDataStore = complicationData)
         }
-        Log.v(TAG, "Data updated: $complicationData")
+
+        applicationContext.complicationsDataStore.data.catch { e ->
+            e.printStackTrace()
+            showToast("Error: ${e.message}")
+        }.onEach { complicationsSettingsStore ->
+            val updateComplicationData = complicationsSettingsStore.complicationsDataStore
+            Log.d(TAG, "Complication data updated: $updateComplicationData")
+        }.launchIn(serviceScope)
     }
 
     private suspend fun showToast(message: String) {
@@ -113,26 +118,33 @@ class LocationUpdateService : Service() {
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
 
+                Log.d(TAG, location.toText())
                 Log.d(TAG, "Handling location update")
 
                 val nearestAirportFlow = airportClient.getAirportUpdates(location)
 
-                nearestAirportFlow.collect {
+                nearestAirportFlow
+                    .catch { e ->
+                        e.printStackTrace()
+                        showToast("Error: ${e.message}")
+                    }
+                    .onEach { (airport, weatherData) ->
 
-                    val (airport, weatherData) = it
+                        val nearestAirport = airport.nearestAirport
 
-                    val nearestAirport = airport.nearestAirport
+                        val newComplicationData = ComplicationsDataStore(
+                            ident = nearestAirport.ident,
+                            distance = airport.distance,
+                            temperature = weatherData.temp,
+                            dewPoint = weatherData.dewPt,
+                            windSpeed = weatherData.windSpeed,
+                            windDirection = weatherData.windDirection
+                        )
 
-                    val newComplicationData = ComplicationsDataStore(
-                        ident = nearestAirport.ident,
-                        distance = airport.distance,
-                        temperature = weatherData.temp,
-                        dewPoint = weatherData.dewPt,
-                        windSpeed = weatherData.windSpeed,
-                        windDirection = weatherData.windDirection
-                    )
-                    updateData(newComplicationData)
-                }
+                        Log.v(TAG, "New Complication Data: $newComplicationData")
+
+                        updateData(newComplicationData)
+                    }.launchIn(serviceScope)
             }
             .launchIn(serviceScope)
 
