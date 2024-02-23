@@ -1,200 +1,146 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.services
 
-import android.annotation.SuppressLint
 import android.app.Service
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Bundle
 import android.os.IBinder
-import android.os.Looper
-import android.os.Message
-import android.os.Messenger
-import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
-import com.google.android.gms.location.*
+import com.google.android.gms.location.LocationServices
+import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
+/**
+ * Returns the `location` object as a human readable string.
+ */
+fun Location?.toText(): String {
+    return if (this != null) {
+        "($latitude, $longitude)"
+    } else {
+        "Unknown location"
+    }
+}
+
 class LocationUpdateService : Service() {
-
-    enum class ActionType {
-        START,
-        STOP
-    }
-
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-
-    private var serviceMessenger: Messenger? = null
-    private var isBound = false
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            serviceMessenger = Messenger(service)
-            isBound = true
-        }
-
-        override fun onServiceDisconnected(className: ComponentName) {
-            serviceMessenger = null
-            isBound = false
-        }
-    }
-
-    private fun bindToAirportService() {
-        Intent(this, AirportService::class.java).also { intent ->
-            bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        }
-    }
-
-    private fun unbindFromAirportService() {
-        if (isBound) {
-            unbindService(serviceConnection)
-            isBound = false
-        }
-    }
-
-    private fun sendLocationUpdate(location: Location) {
-        Log.d(TAG, "Location update received: $location")
-        Log.v(TAG, "isBound: $isBound")
-        if (!isBound) return
-        // Create a new Bundle to hold location data
-        val bundle = Bundle().apply {
-            putDouble("latitude", location.latitude)
-            putDouble("longitude", location.longitude)
-        }
-
-        // Obtain a message and set its what value to the location message identifier
-        val msg = Message.obtain(null, AirportService.IncomingHandler.LOCATION_MESSAGE).apply {
-            data = bundle // Attach the bundle as the message's data
-        }
-
-        try {
-            serviceMessenger?.send(msg)
-        } catch (e: RemoteException) {
-            Log.e(TAG, "Error sending location message to AirportService.", e)
-        }
-    }
-
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
-        private fun hasGps(
-            packageManager: PackageManager
-        ): Boolean =
-            packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+
+        enum class ActionType {
+            START,
+            STOP
+        }
     }
 
-    override fun onBind(intent: Intent): IBinder? {
+    private lateinit var locationClient: LocationClient
+    private lateinit var airportClient: AirportClient
+    private lateinit var db: AirportsDatabase
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
-    @SuppressLint("MissingPermission")
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        when (intent.action) {
-            ActionType.START.toString() -> {
-                Log.d(TAG, "LocationUpdateService started.")
-                // Init the location client
-                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-                if (Utilities.checkPermissions(this)) {
-                    fusedLocationClient.lastLocation
-                        .addOnSuccessListener {
-                            sendLocationUpdate(it)
-                        }
-                }
-                bindToAirportService()
-                startLocationUpdates()
-            }
+    override fun onCreate() {
+        super.onCreate()
 
-            ActionType.STOP.toString() -> {
-                Log.d(TAG, "LocationUpdateService stopped.")
-                stopLocationUpdates()
-                stopSelf()
-            }
+        db = AirportsDatabase.getDatabase(applicationContext)
 
-            else -> {
-                Log.e(TAG, "Unknown action.")
-            }
-        }
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun startLocationUpdates() {
-
-        /*val notification = Utilities.notificationBuilder(
-            this,
-            resources.getString(ResourcesR.string.location_service_notification_channel_id),
-            "Location Service",
-            "Location updates are active.",
-            android.R.drawable.ic_menu_mylocation
-        ).build()*/
-
-        //startForeground(1, notification)
-
-        // Create the location request to start receiving updates
-        // TODO: Set to PRIORITY_BALANCED_POWER_ACCURACY for production and 5 minutes for interval
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            TimeUnit.MINUTES.toMillis(1)
+        locationClient = DefaultLocationClient(
+            applicationContext,
+            LocationServices.getFusedLocationProviderClient(applicationContext)
         )
-            //.setWaitForAccurateLocation(false)
-            .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(30))
-            .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(15))
-            .build()
 
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                if (!hasGps(packageManager)) {
-                    Log.e(TAG, "This hardware doesn't have GPS.")
-                    // TODO: Handle the case when watch doesn't have GPS.
-                    // Fall back to functionality that doesn't use location or
-                    // warn the user that location function isn't available and
-                    // to pair with their phone to receive location information.
-                    val toast = Toast.makeText(
-                        applicationContext,
-                        "This hardware doesn't have GPS. Please pair with your phone to receive location information.",
-                        Toast.LENGTH_LONG
-                    )
-                    toast.show()
-                    return
-                }
-                // Get the last index in the locations array
-
-                if (locationResult.locations.isEmpty()) {
-                    Log.e(TAG, "LocationResult.locations is empty.")
-                    return
-                }
-
-                sendLocationUpdate(locationResult.locations[locationResult.locations.lastIndex])
-            }
-        }
-
-        if (Utilities.checkPermissions(this)) {
-
-            Log.d(TAG, "Location permissions granted.")
-
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
-        } else {
-            Log.e(TAG, "Location permissions not granted.")
-            return
-        }
+        airportClient = DefaultAirportClient(applicationContext, db.airportDAO())
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        stopLocationUpdates()
+        AirportsDatabase.destroyInstance()
+        serviceScope.cancel()
     }
 
-    private fun stopLocationUpdates() {
-        unbindFromAirportService()
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ActionType.START.toString() -> start()
+            ActionType.STOP.toString() -> stop()
+        }
+
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private suspend fun updateData(complicationData: ComplicationsDataStore) {
+        Log.d(TAG, "Updating data and notifying complications")
+        Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
+        applicationContext.complicationsDataStore.updateData {
+            it.copy(
+                complicationsDataStore = complicationData
+            )
+        }
+        Log.v(TAG, "Data updated: $complicationData")
+    }
+
+    private suspend fun showToast(message: String) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun start() {
+        val notification = Utilities.notificationBuilder(
+            this,
+            getString(R.string.location_service_notification_channel_id),
+            "Location Updates Active",
+            "Location updates are active",
+            android.R.drawable.ic_dialog_info
+        )
+            .setOngoing(true)
+            .build()
+
+        locationClient
+            .getLocationUpdates(TimeUnit.SECONDS.toMillis(5))
+            .catch { e -> e.printStackTrace() }
+            .onEach { location ->
+
+                Log.d(TAG, "Handling location update")
+
+                val nearestAirportFlow = airportClient.getAirportUpdates(location)
+
+                nearestAirportFlow.collect {
+
+                    val (airport, weatherData) = it
+
+                    val nearestAirport = airport.nearestAirport
+
+                    val newComplicationData = ComplicationsDataStore(
+                        ident = nearestAirport.ident,
+                        distance = airport.distance,
+                        temperature = weatherData.temp,
+                        dewPoint = weatherData.dewPt,
+                        windSpeed = weatherData.windSpeed,
+                        windDirection = weatherData.windDirection
+                    )
+                    updateData(newComplicationData)
+                }
+            }
+            .launchIn(serviceScope)
+
+        startForeground(1, notification)
+    }
+
+    private fun stop() {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
     }
 }

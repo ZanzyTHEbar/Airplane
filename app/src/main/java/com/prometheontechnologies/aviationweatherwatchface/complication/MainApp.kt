@@ -1,9 +1,9 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication
 
 import android.app.Application
-import android.content.Intent
-import android.util.Log
-import com.prometheontechnologies.aviationweatherwatchface.complication.services.LocationUpdateService
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 
 /*
 * App architecture:
@@ -17,28 +17,22 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.services
 class MainApp : Application() {
 
     companion object {
-        lateinit var locationUpdateService: Intent
         private val TAG = MainApp::class.java.simpleName
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        // Create the notification channel
-        //val channel = NotificationChannel(
-        //    resources.getString(ResourcesR.string.location_service_notification_channel_id),
-        //    "Aviation Weather Location Service",
-        //    NotificationManager.IMPORTANCE_DEFAULT
-        //)
-        //val notificationManager =
-        //    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        //notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            getString(R.string.location_service_notification_channel_id),
+            "Location Service",
+            NotificationManager.IMPORTANCE_HIGH
+        )
 
-        // Start the location service
-        locationUpdateService = Intent(applicationContext, LocationUpdateService::class.java).also {
-            it.action = LocationUpdateService.ActionType.START.toString()
-            startService(it)
-        }
-        Log.d(TAG, "${locationUpdateService.action.toString()} started.")
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        notificationManager.createNotificationChannel(channel)
+
     }
 }

@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (C) 2021 The Android Open Source Project
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -13,18 +12,11 @@
 -->
 <resources>
     <string name="app_name">Aviation Weather Watchface</string>
-    <!--
-    This string is used for square devices and overridden by hello_world in
-    values-round/strings.xml for round devices.
-    -->
-    <string name="device_shape">Square Device</string>
-    <string name="hello_world_starter">Hello, Compose World!</string>
-    <string name="preference_file_key" />
 
     <string name="location_service_notification_channel_id">aviation_weather_watchface_location_service</string>
     <string name="complication_data_updated">com.prometheontechnologies.aviationweatherwatchface.AIRPORT_DATA_UPDATED</string>
 
-    <string name="user_denied_remote_permission">User denied permission on remote device.</string>
+    <!--<string name="user_denied_remote_permission">User denied permission on remote device.</string>
     <string name="user_approved_remote_permission">User approved permission on remote device, requesting data again.</string>
     <string name="requested_info_from_phone">Requested info from phone. New approval may be required.</string>
     <string name="requested_local_permission">Requested local permission.</string>
@@ -32,13 +24,19 @@
     <string name="sensor_summary">%1$d sensors on wear device(s)!</string>
     <string name="title_activity_request_permission_on_phone">PhonePermissionRationale</string>
     <string name="permission_message_activity_request_permission_on_phone">App requires access to your phone\'s information.</string>
-    <string name="open_on_phone_message_activity_request_permission_on_phone">Open on phone</string>
+    <string name="open_on_phone_message_activity_request_permission_on_phone">Open on phone</string>-->
+
+    <!--
+    Location Preferences
+    -->
+
     <string name="no_location_text">No location Data could be resolved</string>
-    <string name="digital_config_name">Config Screen</string>
-    <string name="digital_watch_face_name">Weather</string>
-    <string name="config_complications_name">Data Provider</string>
     <string name="complications_label">Aviation Weather Watchface Data Provider</string>
-    <!-- Time Complication Preferences -->
+
+    <!--
+    Time Complication Preferences
+    -->
+
     <string name="time_comp_name">Time</string>
     <string name="time_comp_desc">Current Time</string>
     <string name="time_setting_leading_zero_title">Leading zero</string>
@@ -49,9 +47,19 @@
     <string name="time_ampm_setting_title">Hour Format</string>
     <string name="time_ampm_setting_on">24h</string>
     <string name="time_ampm_setting_off">12h</string>
+
+
+    <!--
+    Complication Names
+    -->
+
     <string name="distance_complication_name">Distance Complication Service</string>
     <string name="ident_complication_name">IDENT Complication Service</string>
     <string name="temp_complication_name">Temperature Complication Service</string>
     <string name="time_complication_name">Zulu Time Complication Service</string>
     <string name="wind_complication_name">Wind Complication Service</string>
+    <string name="location_permission_message">Please enable perms to use this provider.</string>
+    <string name="location_permission_title">Location Perms</string>
+    <string name="title_activity_location_permissions_dialog">LocationPermissionsDialogActivity
+    </string>
 </resources>

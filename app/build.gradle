@@ -34,6 +34,9 @@ android {
         }
         versionCode 1
         versionName "1.0"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     buildTypes {
@@ -48,11 +51,11 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+        jvmTarget = JavaVersion.VERSION_17
+        freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
         // Enable Coroutines and Flow APIs
-        freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.FlowPreview"
+        freeCompilerArgs += "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
+        freeCompilerArgs += "-opt-in=kotlinx.coroutines.FlowPreview"
     }
     buildFeatures {
         compose true
@@ -158,7 +161,15 @@ dependencies {
     implementation libs.androidx.room.runtime
     implementation libs.androidx.room.paging
     implementation libs.androidx.room.ktx
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.uix
+    implementation libs.ui.graphics
+    implementation libs.material3
+    androidTestImplementation platform(libs.androidx.compose.bom)
+    debugImplementation libs.ui.test.manifest
     ksp libs.androidx.room.compiler
+
+    implementation libs.android.permissions
 
     // Testing and Debugging
     testImplementation libs.junit

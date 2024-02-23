@@ -9,17 +9,11 @@ import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.ComplicationsDataRepository
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.DataStoreModule
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import kotlinx.coroutines.flow.first
+import kotlin.math.roundToInt
 
 class DistanceComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val appDataRepository: ComplicationsDataRepository by lazy {
-        ComplicationsDataRepository.getInstance(
-            DataStoreModule.provideProtoDataStore(applicationContext)
-        )
-    }
 
     override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
         Log.d(TAG, "Complication Activated: $complicationInstanceId")
@@ -46,13 +40,16 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val complicationsDataStore = appDataRepository
-            .appData
+        val complicationsDataStore = applicationContext
+            .complicationsDataStore
+            .data
             .first()
             .complicationsDataStore
 
+        Log.v(TAG, "complicationsDataStore: $complicationsDataStore")
+
         val distance = complicationsDataStore.distance / NAUTICAL_MILES_CONSTANT
-        val text = "$distance"
+        val text = "${distance.roundToInt()}${UNIT}"
 
         return when (request.complicationType) {
             ComplicationType.SHORT_TEXT -> {
@@ -67,7 +64,7 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
             ComplicationType.LONG_TEXT -> {
                 LongTextComplicationData.Builder(
                     PlainComplicationText.Builder(
-                        "${description}: ${complicationsDataStore.temperature}${UNIT}"
+                        "${description}: $text"
                     ).build(),
                     PlainComplicationText.Builder(description).build()
                 )
@@ -87,7 +84,7 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
     }
 
     companion object {
-        private val TAG = TempComplicationService::class.java.simpleName
+        private val TAG = DistanceComplicationService::class.java.simpleName
         private const val NAUTICAL_MILES_CONSTANT = 1.852
         private const val UNIT = "NM"
         private const val description = "Distance"
