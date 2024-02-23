@@ -53,6 +53,7 @@ class DefaultLocationClient(
                 throw LocationClient.LocationNotAvailableException(message)
             }
 
+
             // TODO: Set to PRIORITY_BALANCED_POWER_ACCURACY for production and 5 minutes for interval
             val locationRequest = LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
