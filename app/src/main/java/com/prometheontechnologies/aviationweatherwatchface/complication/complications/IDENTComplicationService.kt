@@ -9,17 +9,10 @@ import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.ComplicationsDataRepository
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.DataStoreModule
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import kotlinx.coroutines.flow.first
 
 class IDENTComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val appDataRepository: ComplicationsDataRepository by lazy {
-        ComplicationsDataRepository.getInstance(
-            DataStoreModule.provideProtoDataStore(applicationContext)
-        )
-    }
 
     override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
         Log.d(TAG, "Complication Activated: $complicationInstanceId")
@@ -46,8 +39,9 @@ class IDENTComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val complicationsDataStore = appDataRepository
-            .appData
+        val complicationsDataStore = applicationContext
+            .complicationsDataStore
+            .data
             .first()
             .complicationsDataStore
 

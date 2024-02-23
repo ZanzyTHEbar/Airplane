@@ -19,18 +19,11 @@ import androidx.wear.watchface.complications.datasource.SuspendingComplicationDa
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.R.drawable
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.ComplicationsDataRepository
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.DataStoreModule
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 
 class TimeComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val appDataRepository: ComplicationsDataRepository by lazy {
-        ComplicationsDataRepository.getInstance(
-            DataStoreModule.provideProtoDataStore(applicationContext)
-        )
-    }
 
     private fun openScreen(): PendingIntent? {
         val mClockIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
@@ -55,8 +48,9 @@ class TimeComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        val preferences = appDataRepository
-            .appData
+        val preferences = applicationContext
+            .complicationsDataStore
+            .data
             .first()
             .userPreferences
 

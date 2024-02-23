@@ -1,11 +1,7 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
-import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
@@ -19,25 +15,6 @@ class Utilities {
     companion object {
 
         private val TAG = Utilities::class.java.simpleName
-
-        fun checkPermissions(context: Context): Boolean {
-            val locationPerms = ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-
-            Log.d(TAG, "Location permissions: $locationPerms")
-
-            return locationPerms
-            /*return ActivityCompat.checkSelfPermission(
-                contextContext,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                contextContext, Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                contextContext, Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED*/
-        }
 
         fun notificationBuilder(
             context: Context,
