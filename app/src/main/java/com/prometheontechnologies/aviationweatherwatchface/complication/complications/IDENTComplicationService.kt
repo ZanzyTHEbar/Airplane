@@ -10,9 +10,17 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import kotlinx.coroutines.flow.first
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class IDENTComplicationService : SuspendingComplicationDataSourceService() {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
         Log.d(TAG, "Complication Activated: $complicationInstanceId")
@@ -39,28 +47,34 @@ class IDENTComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val complicationsDataStore = applicationContext
-            .complicationsDataStore
-            .data
-            .first()
-            .complicationsDataStore
+        var complicationData: ComplicationsDataStore? = null
 
-        val text = complicationsDataStore.ident
+        applicationContext
+            .complicationsDataStore
+            .data.catch { e ->
+                Log.e(TAG, "Error getting complicationsDataStore", e)
+            }.onEach { data ->
+                complicationData = data.complicationsDataStore
+            }.launchIn(scope)
+
+        val text = complicationData?.ident
 
         return when (request.complicationType) {
             ComplicationType.SHORT_TEXT -> {
-                ShortTextComplicationData
-                    .Builder(
-                        text = PlainComplicationText.Builder(text).build(),
-                        contentDescription = PlainComplicationText.Builder(description).build()
-                    )
-                    .build()
+                text?.let { PlainComplicationText.Builder(it).build() }?.let {
+                    ShortTextComplicationData
+                        .Builder(
+                            text = it,
+                            contentDescription = PlainComplicationText.Builder(description).build()
+                        )
+                        .build()
+                }
             }
 
             ComplicationType.LONG_TEXT -> {
                 LongTextComplicationData.Builder(
                     PlainComplicationText.Builder(
-                        "${description}: ${complicationsDataStore.temperature}${UNIT}"
+                        "${description}: $text${UNIT}"
                     ).build(),
                     PlainComplicationText.Builder(description).build()
                 )

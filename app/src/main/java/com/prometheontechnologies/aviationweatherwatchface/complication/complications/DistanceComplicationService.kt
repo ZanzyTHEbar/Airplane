@@ -8,24 +8,30 @@ import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
+import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlin.math.roundToInt
 
 class DistanceComplicationService : SuspendingComplicationDataSourceService() {
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
         Log.d(TAG, "Complication Activated: $complicationInstanceId")
     }
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
-        return Utilities.presentPreviewData(
+        return Utilities.presentComplicationViews(
             this,
             type,
             description,
             "23",
-            UNIT
+            R.drawable.ic_distance
         )
     }
 

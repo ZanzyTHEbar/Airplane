@@ -1,5 +1,6 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication
 
+import android.app.PendingIntent
 import android.content.Context
 import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
@@ -8,7 +9,6 @@ import androidx.wear.watchface.complications.data.ComplicationType
 import androidx.wear.watchface.complications.data.LongTextComplicationData
 import androidx.wear.watchface.complications.data.MonochromaticImage
 import androidx.wear.watchface.complications.data.PlainComplicationText
-import androidx.wear.watchface.complications.data.RangedValueComplicationData
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
 
 class Utilities {
@@ -30,13 +30,13 @@ class Utilities {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         }
 
-        // TODO: Implement custom Icons
-        fun presentPreviewData(
+        fun presentComplicationViews(
             context: Context,
             type: ComplicationType,
             description: String,
             placeholderFirst: String,
-            placeholderSecond: String,
+            resID: Int,
+            tapAction: PendingIntent? = null
         ): ComplicationData? {
             return when (type) {
                 ComplicationType.SHORT_TEXT -> ShortTextComplicationData.Builder(
@@ -48,11 +48,11 @@ class Utilities {
                         MonochromaticImage.Builder(
                             image = Icon.createWithResource(
                                 context,
-                                R.drawable.ic_clock
+                                resID
                             )
                         ).build()
                     )
-                    .setTapAction(null)
+                    .setTapAction(tapAction)
                     .build()
 
                 ComplicationType.LONG_TEXT -> LongTextComplicationData.Builder(
@@ -64,31 +64,11 @@ class Utilities {
                         MonochromaticImage.Builder(
                             image = Icon.createWithResource(
                                 context,
-                                R.drawable.ic_clock
+                                resID
                             )
                         ).build()
                     )
-                    .setTapAction(null)
-                    .build()
-
-                ComplicationType.RANGED_VALUE -> RangedValueComplicationData.Builder(
-                    value = 608f,
-                    min = 0f,
-                    max = 1440f,
-                    contentDescription = PlainComplicationText.Builder(text = description)
-                        .build()
-                )
-                    .setText(PlainComplicationText.Builder(text = placeholderFirst).build())
-                    .setTitle(PlainComplicationText.Builder(text = placeholderSecond).build())
-                    .setMonochromaticImage(
-                        MonochromaticImage.Builder(
-                            image = Icon.createWithResource(
-                                context,
-                                R.drawable.ic_clock
-                            )
-                        ).build()
-                    )
-                    .setTapAction(null)
+                    .setTapAction(tapAction)
                     .build()
 
                 else -> {
