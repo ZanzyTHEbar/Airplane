@@ -19,7 +19,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
@@ -84,13 +83,10 @@ class LocationUpdateService : Service() {
     private suspend fun updateData(complicationData: ComplicationsDataStore) {
         Log.d(TAG, "Updating data and notifying complications")
         Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
-
-        runBlocking {
-            applicationContext.complicationsDataStore.updateData {
-                it.copy(
-                    complicationsDataStore = complicationData
-                )
-            }
+        applicationContext.complicationsDataStore.updateData {
+            it.copy(
+                complicationsDataStore = complicationData
+            )
         }
         Log.v(TAG, "Data updated: $complicationData")
     }
@@ -113,7 +109,7 @@ class LocationUpdateService : Service() {
             .build()
 
         locationClient
-            .getLocationUpdates(TimeUnit.SECONDS.toMillis(1))
+            .getLocationUpdates(TimeUnit.SECONDS.toMillis(5))
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
 
