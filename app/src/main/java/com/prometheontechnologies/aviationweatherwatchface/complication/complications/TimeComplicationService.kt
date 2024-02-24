@@ -19,17 +19,10 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.UserPreferences
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 
 class TimeComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private fun openScreen(): PendingIntent? {
         val mClockIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
@@ -54,31 +47,17 @@ class TimeComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        var preferences: UserPreferences? = null
-
-        applicationContext
-            .complicationsDataStore
-            .data
-            .catch { e ->
-                Log.e(TAG, "Error getting complicationsDataStore", e)
-            }.onEach { data ->
-                preferences = data.userPreferences
-            }.launchIn(scope)
-
+        val preferences: UserPreferences =
+            applicationContext.complicationsDataStore.data.first().userPreferences
 
         val hour = LocalDateTime.now().hour
         val min = LocalDateTime.now().minute
         val progressVariable = hour * 60 + min.toFloat()
 
-        val isMilitary = preferences?.isMilitaryTime
-        val leadingZero = preferences?.isLeadingZeroTime
+        val isMilitary = preferences.isMilitaryTime
+        val leadingZero = preferences.isLeadingZeroTime
 
-        if (isMilitary == null || leadingZero == null) {
-            Log.e(TAG, "UserPreferences not found")
-            return null
-        }
-
-        val fmt = if (isMilitary && leadingZero) "HH:mm'Z'"
+        val fmt = if (isMilitary && leadingZero) "HH:mm'z'"
         else if (!isMilitary && !leadingZero) "h:mm"
         else if (isMilitary) "H:mm"
         else "hh:mm"
@@ -162,7 +141,6 @@ class TimeComplicationService : SuspendingComplicationDataSourceService() {
     companion object {
         private val TAG = TimeComplicationService::class.java.simpleName
         private const val placeHolder = "23:34"
-        private const val suffixZ = "z"
     }
 }
 

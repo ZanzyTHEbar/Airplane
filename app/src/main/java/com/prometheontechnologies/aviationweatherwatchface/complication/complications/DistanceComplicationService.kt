@@ -3,27 +3,16 @@ package com.prometheontechnologies.aviationweatherwatchface.complication.complic
 import android.util.Log
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
-import androidx.wear.watchface.complications.data.LongTextComplicationData
-import androidx.wear.watchface.complications.data.PlainComplicationText
-import androidx.wear.watchface.complications.data.ShortTextComplicationData
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
 import kotlinx.coroutines.flow.first
 import kotlin.math.roundToInt
 
 class DistanceComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
-        Log.d(TAG, "Complication Activated: $complicationInstanceId")
-    }
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         return Utilities.presentComplicationViews(
@@ -46,47 +35,30 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val complicationsDataStore = applicationContext
-            .complicationsDataStore
-            .data
-            .first()
-            .complicationsDataStore
+        val complicationData: ComplicationsDataStore =
+            applicationContext.complicationsDataStore.data.first().complicationsDataStore
 
-        Log.v(TAG, "complicationsDataStore: $complicationsDataStore")
-
-        val distance = complicationsDataStore.distance / NAUTICAL_MILES_CONSTANT
+        val distance = complicationData.distance / NAUTICAL_MILES_CONSTANT
         val text = "${distance.roundToInt()}${UNIT}"
 
-        return when (request.complicationType) {
-            ComplicationType.SHORT_TEXT -> {
-                ShortTextComplicationData
-                    .Builder(
-                        text = PlainComplicationText.Builder(text).build(),
-                        contentDescription = PlainComplicationText.Builder(description).build()
-                    )
-                    .build()
-            }
+        return Utilities.presentComplicationViews(
+            this,
+            request.complicationType,
+            description,
+            text,
+            R.drawable.ic_distance
+        )
+    }
 
-            ComplicationType.LONG_TEXT -> {
-                LongTextComplicationData.Builder(
-                    PlainComplicationText.Builder(
-                        "${description}: $text"
-                    ).build(),
-                    PlainComplicationText.Builder(description).build()
-                )
-                    .build()
-            }
 
-            else -> {
-                Log.e(TAG, "Unexpected complication type: ${request.complicationType}")
-                null
-            }
-        }
+    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
+        super.onComplicationActivated(complicationInstanceId, type)
+        Log.d(TAG, "Complication Activated: $complicationInstanceId")
     }
 
     override fun onComplicationDeactivated(complicationInstanceId: Int) {
-        super.onComplicationDeactivated(complicationInstanceId)
         Log.d(TAG, "Complication Deactivated: $complicationInstanceId")
+        super.onComplicationDeactivated(complicationInstanceId)
     }
 
     companion object {

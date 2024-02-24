@@ -1,6 +1,9 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.services
 
+import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.IBinder
@@ -9,6 +12,7 @@ import android.widget.Toast
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
+import com.prometheontechnologies.aviationweatherwatchface.complication.compose.NotificationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
@@ -36,6 +40,8 @@ fun Location?.toText(): String {
 class LocationUpdateService : Service() {
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
+        const val INTENT_DATA_UPDATE =
+            "com.prometheontechnologies.aviationweatherwatchface.complication.action.DATA_UPDATE"
 
         enum class ActionType {
             START,
@@ -102,11 +108,12 @@ class LocationUpdateService : Service() {
         }
     }
 
+    @SuppressLint("WearRecents")
     private fun start() {
         val notification = Utilities.notificationBuilder(
             this,
             getString(R.string.location_service_notification_channel_id),
-            "Location Updates Active",
+            "Aviation Weather Watchface",
             "Location updates are active",
             android.R.drawable.ic_dialog_info
         )
@@ -148,7 +155,21 @@ class LocationUpdateService : Service() {
             }
             .launchIn(serviceScope)
 
-        startForeground(1, notification)
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notifsEnabled = notificationManager.areNotificationsEnabled()
+
+        if (!notifsEnabled) {
+            // Request perms from the user
+            val intent = Intent(this, NotificationPermissionsDialogActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            this.stop()
+        }
+
+        startForeground(100, notification)
+        notificationManager.notify(100, notification)
     }
 
     private fun stop() {
