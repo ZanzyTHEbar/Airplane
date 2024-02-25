@@ -10,20 +10,9 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.first
 
 class TempComplicationService : SuspendingComplicationDataSourceService() {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
-        Log.d(TAG, "Complication Activated: $complicationInstanceId")
-    }
 
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         return Utilities.presentComplicationViews(
@@ -38,17 +27,10 @@ class TempComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        var complicationData: ComplicationsDataStore? = null
+        val complicationData: ComplicationsDataStore =
+            applicationContext.complicationsDataStore.data.first().complicationsDataStore
 
-        applicationContext
-            .complicationsDataStore
-            .data.catch { e ->
-                Log.e(TAG, "Error getting complicationsDataStore", e)
-            }.onEach { data ->
-                complicationData = data.complicationsDataStore
-            }.launchIn(scope)
-
-        val text = "${complicationData?.temperature}/${complicationData?.dewPoint}${UNIT}"
+        val text = "${complicationData.temperature}/${complicationData.dewPoint}${UNIT}"
 
         return Utilities.presentComplicationViews(
             this,
@@ -57,6 +39,11 @@ class TempComplicationService : SuspendingComplicationDataSourceService() {
             text,
             R.drawable.ic_temp
         )
+    }
+
+    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
+        super.onComplicationActivated(complicationInstanceId, type)
+        Log.d(TAG, "Complication Activated: $complicationInstanceId")
     }
 
     override fun onComplicationDeactivated(complicationInstanceId: Int) {

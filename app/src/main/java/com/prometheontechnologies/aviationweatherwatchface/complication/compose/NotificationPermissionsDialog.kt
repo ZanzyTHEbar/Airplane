@@ -1,9 +1,11 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.compose
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -18,29 +20,23 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
 import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.prometheontechnologies.aviationweatherwatchface.complication.theme.AviationWeatherWatchFaceTheme
 
-
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionsDialog(
+fun NotificationsPermissionsDialog(
     context: Context,
     finish: () -> Unit
 ) {
     val listState = rememberScalingLazyListState()
     AviationWeatherWatchFaceTheme {
 
-        val locationPermissionsState = rememberMultiplePermissionsState(
-            permissions = listOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-        )
-
-        val backGroundPermissionState = rememberPermissionState(
-            permission = Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        val notificationsPermissionState = rememberPermissionState(
+            permission = Manifest.permission.POST_NOTIFICATIONS
         )
 
         val contentModifier = Modifier
@@ -64,42 +60,29 @@ fun PermissionsDialog(
         ) {
             item { Spacer(modifier = Modifier.padding(20.dp)) }
 
-            if (locationPermissionsState.allPermissionsGranted) {
-                item {
-                    CardWidget(context, contentModifier, backGroundPermissionState)
-                }
+
+            if (notificationsPermissionState.status.isGranted) {
+                Toast.makeText(context, "Notifications permission granted", Toast.LENGTH_SHORT)
+                    .show()
+
+                val intent = Intent(context, LocationPermissionsDialogActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+
+                // close this activity
+                finish()
             } else {
-
-                val notificationManager =
-                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-                val notifsEnabled = notificationManager.areNotificationsEnabled()
-
-                if (!notifsEnabled) {
-                    val intent = Intent(context, NotificationPermissionsDialogActivity::class.java)
-                    intent.flags =
-                        Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
-                    finish()
-                }
-
-                val allPermissionsRevoked =
-                    locationPermissionsState.permissions.size == locationPermissionsState.revokedPermissions.size
-
-                val textToShow = if (!allPermissionsRevoked) {
-                    "You must grant location permissions to continue"
-                } else if (locationPermissionsState.shouldShowRationale) {
-                    "Aviation Weather Watchface requires location permissions to function properly"
+                val textToShow = if (notificationsPermissionState.status.shouldShowRationale) {
+                    "In order to receive notifications, please grant the notification permission"
                 } else {
-                    "Getting your exact location is important for this app. " +
-                            "Please grant us fine location. " +
-                            "Thank you :D"
+                    "Notifications are required for the app to function properly"
                 }
 
                 item { TextWidget(contentModifier, textToShow) }
                 item {
                     ButtonWidget(contentModifier, iconModifier, onClick = {
-                        locationPermissionsState.launchMultiplePermissionRequest()
+                        notificationsPermissionState.launchPermissionRequest()
                     })
                 }
             }

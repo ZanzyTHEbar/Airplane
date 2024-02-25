@@ -6,6 +6,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
+import com.prometheontechnologies.aviationweatherwatchface.complication.services.LocationUpdateService.Companion.INTENT_DATA_UPDATE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -55,24 +56,22 @@ class ReceiverService : BroadcastReceiver() {
         // Required when using async code in onReceive().
         val result = goAsync()
 
-        // Launches coroutine to update the data store and handle the service task.
         scope.launch {
             try {
 
-                // TODO: Implement military support for weather data
-                //updateSettingsDataStore(context)
+                when (intent.action) {
+                    INTENT_DATA_UPDATE -> {
 
-                // Handle the service task
+                        context.let {
+                            ComplicationDataSourceUpdateRequester.create(
+                                context = it!!,
+                                complicationDataSourceComponent = dataSource
+                            )
+                        }.requestUpdate(complicationId)
 
-                // Request an update for the complication that has just been tapped, that is,
-                // the system call onComplicationUpdate on the specified complication data
-                // source.
-                context.let {
-                    ComplicationDataSourceUpdateRequester.create(
-                        context = it!!,
-                        complicationDataSourceComponent = dataSource
-                    )
-                }.requestUpdate(complicationId)
+                    }
+                }
+
             } finally {
                 // Always call finish, even if cancelled
                 result.finish()

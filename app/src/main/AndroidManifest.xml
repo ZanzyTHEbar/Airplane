@@ -163,12 +163,24 @@
             android:label="@string/title_activity_location_permissions_dialog"
             android:taskAffinity=""
             android:theme="@android:style/Theme.DeviceDefault">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
+        <activity
+            android:name=".compose.NotificationPermissionsDialogActivity"
+            android:exported="true"
+            android:label="@string/title_activity_notifications_permissions_dialog"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
