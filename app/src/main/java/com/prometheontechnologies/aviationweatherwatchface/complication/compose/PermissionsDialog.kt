@@ -92,7 +92,7 @@ fun PermissionsDialog(
                     "Aviation Weather Watchface requires location permissions to function properly"
                 } else {
                     "Getting your exact location is important for this app. " +
-                            "Please grant us fine location. " +
+                            "Please grant us precise location, " +
                             "Thank you :D"
                 }
 

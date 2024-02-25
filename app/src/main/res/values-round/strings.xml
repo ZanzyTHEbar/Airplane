@@ -13,10 +13,9 @@
 -->
 <resources>
     <string name="device_shape">Round Device</string>
-    <string name="complications_label">Aviation Weather Watchface Data Provider</string>
-    <string name="distance_complication_name">Distance Complication Service</string>
-    <string name="ident_complication_name">IDENT Complication Service</string>
-    <string name="temp_complication_name">Temperature Complication Service</string>
-    <string name="time_complication_name">Zulu Time Complication Service</string>
-    <string name="wind_complication_name">Wind Complication Service</string>
+    <string name="distance_complication_name">Aviation Weather Distance</string>
+    <string name="ident_complication_name">Aviation Weather IDENT</string>
+    <string name="temp_complication_name">Aviation Weather Temperature</string>
+    <string name="time_complication_name">Aviation Weather Zulu Time</string>
+    <string name="wind_complication_name">Aviation Weather Wind</string>
 </resources>

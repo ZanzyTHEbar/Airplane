@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -62,9 +61,6 @@ fun NotificationsPermissionsDialog(
 
 
             if (notificationsPermissionState.status.isGranted) {
-                Toast.makeText(context, "Notifications permission granted", Toast.LENGTH_SHORT)
-                    .show()
-
                 val intent = Intent(context, LocationPermissionsDialogActivity::class.java)
                 intent.flags =
                     Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
