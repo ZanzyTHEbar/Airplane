@@ -6,12 +6,10 @@ import android.location.Location
 import android.util.Log
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.Airport
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportDAO
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.APIModel
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.NearestAirport
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherData
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.hasLocationPermissions
-import com.prometheontechnologies.aviationweatherwatchface.complication.services.WeatherApi
 import com.prometheontechnologies.aviationweatherwatchface.complication.services.toText
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +25,8 @@ import kotlin.math.sqrt
 
 class DefaultAirportClient(
     private val context: Context,
-    private val dao: AirportDAO
+    private val dao: AirportDAO,
+    private val weatherClient: WeatherClient
 ) : AirportClient {
 
     companion object {
@@ -90,7 +89,7 @@ class DefaultAirportClient(
     private suspend fun findNearestAirport(
         nearbyLocations: List<Airport>,
         currentLocation: Location
-    ): Pair<NearestAirport?, WeatherData?> {
+    ): Result<NearestAirport> {
         Log.d(TAG, "Located Airports: $nearbyLocations")
 
         val closestAirports = nearbyLocations.map {
@@ -121,50 +120,57 @@ class DefaultAirportClient(
 
         if (filteredAirports.isEmpty()) {
             Log.e(TAG, "No airports found.")
-            return Pair(
-                null,
-                null
-            )
+            return Result.failure(AirportClient.AirportNotAvailableException("No airports found."))
         }
 
         Log.d(TAG, "Filtered Airports: $filteredAirports")
 
-        var apiData: APIModel? = null
-        var closestAirport: Pair<Airport, Float>? = null
+        var closestAirport: Pair<Airport, Float> = Pair(
+            Airport(
+                id = 0,
+                ident = "",
+                type = "",
+                name = "",
+                latitudeDeg = 0.0,
+                longitudeDeg = 0.0,
+                elevationFt = 0.0,
+                continent = "",
+                isoCountry = "",
+                isoRegion = "",
+                municipality = "",
+                scheduledService = "",
+                gpsCode = "",
+                iataCode = "",
+                localCode = "",
+                homeLink = "",
+                wikipediaLink = "",
+                keywords = ""
+            ), 0.0f
+        )
 
-        // Setup a recursive call to handle the api, pass in the first airport in the list and if it returns an empty body, call the next airport in the list
         for (airport in filteredAirports) {
-            val result = handleApi(airport.first)
+            val result = weatherClient.callWeatherApi(airport.first.ident)
             if (result.isSuccess) {
-                apiData = result.getOrNull()
                 closestAirport = airport
                 break
             }
         }
 
-        val airport = closestAirport?.first
+        if (closestAirport.first.id == 0) {
+            Log.e(TAG, "No airports found.")
+            return Result.failure(AirportClient.AirportNotAvailableException("No airports found."))
+        }
+
+        val airport = closestAirport.first
         // Convert to kilometers
-        val distance = (((closestAirport?.second?.div(1000.0)) ?: 0.0))
+        val distance = closestAirport.second.div(1000.0)
 
-        val nearestAirport = airport?.let {
-            NearestAirport(
-                nearestAirport = it,
-                distance = distance,
-            )
-        }
+        val nearestAirport = NearestAirport(
+            nearestAirport = airport,
+            distance = distance,
+        )
 
-        val weatherData = apiData?.let {
-            WeatherData(
-                location = currentLocation.toText(),
-                temp = it.temp,
-                dewPt = apiData.dewp,
-                windSpeed = apiData.wspd,
-                windDirection = apiData.wdir,
-                time = apiData.reportTime
-            )
-        }
-
-        return Pair(nearestAirport, weatherData)
+        return Result.success(nearestAirport)
     }
 
     private fun dbQuery(
@@ -173,8 +179,8 @@ class DefaultAirportClient(
     ): Pair<Pair<Double, Double>, Pair<Double, Double>> {
         // Latitude range remains constant because 1 degree of latitude is approximately 111 kilometers everywhere.
         val latRange = rangeKm / 111.0
-        // Calculate longitude range dynamically based on user's latitude.
 
+        // Calculate longitude range dynamically based on user's latitude.
         val lonRange = calculateLongitudeRangeAtLatitude(currentLocation.latitude, rangeKm)
         val minLat = currentLocation.latitude - latRange
         val maxLat = currentLocation.latitude + latRange
@@ -183,24 +189,8 @@ class DefaultAirportClient(
         return Pair(Pair(minLat, maxLat), Pair(minLon, maxLon))
     }
 
-    private suspend fun handleApi(nearestAirport: Airport): Result<APIModel> {
-        val weatherDTO: List<APIModel> = WeatherApi.apiInstance.getMetarDetails(
-            nearestAirport.ident, true, "json"
-        )
-
-        // TODO setup notifications for when the weather data is not available
-        if (weatherDTO.isEmpty()) {
-            Log.e(TAG, "Weather DTO is empty.")
-            return Result.failure(Exception("Weather DTO is empty."))
-        }
-
-        Log.d(TAG, "Weather DTO: $weatherDTO")
-        // TODO Setup logic to handle multiple weather data
-        return Result.success(weatherDTO.first())
-    }
-
     @SuppressLint("MissingPermission")
-    override fun getAirportUpdates(currentLocation: Location): Flow<Pair<NearestAirport, WeatherData>> {
+    override fun getAirportUpdates(currentLocation: Location): Flow<NearestAirport> {
         return callbackFlow {
             if (!context.hasLocationPermissions()) {
                 throw AirportClient.AirportNotAvailableException("Location permissions not granted")
@@ -228,21 +218,21 @@ class DefaultAirportClient(
                     currentLocation = currentLocation
                 )
                 // Find the nearest airport
-                val (nearestAirport, weatherData) = findNearestAirport(
+                val data = findNearestAirport(
                     filteredLocations,
                     currentLocation
-                )
+                ).getOrNull()
 
-                if (nearestAirport == null || weatherData == null) {
-                    throw AirportClient.AirportNotAvailableException("No airports found")
+                launch {
+                    if (data != null) {
+                        send(data)
+                    }
                 }
-
-                val data: Pair<NearestAirport, WeatherData> = Pair(nearestAirport, weatherData)
-
-                launch { send(data) }
             }
 
-            awaitClose {}
+            awaitClose {
+                Log.d(TAG, "Closing flow")
+            }
         }
     }
 }

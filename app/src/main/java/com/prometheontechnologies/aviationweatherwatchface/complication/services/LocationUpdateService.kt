@@ -3,30 +3,25 @@ package com.prometheontechnologies.aviationweatherwatchface.complication.service
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.Service
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.IBinder
 import android.util.Log
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.activities.NotificationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultAirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultLocationClient
-import com.prometheontechnologies.aviationweatherwatchface.complication.complications.DistanceComplicationService
-import com.prometheontechnologies.aviationweatherwatchface.complication.complications.IDENTComplicationService
-import com.prometheontechnologies.aviationweatherwatchface.complication.complications.TempComplicationService
-import com.prometheontechnologies.aviationweatherwatchface.complication.complications.WindComplicationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultWeatherClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationClient
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,7 +29,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
@@ -51,6 +45,11 @@ fun Location?.toText(): String {
 class LocationUpdateService : Service() {
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
+        const val UPDATE_LOCATION_DATA_ACTION =
+            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE"
+
+        const val LOCATION_UPDATE =
+            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE"
 
         var isRunning = false
 
@@ -60,9 +59,10 @@ class LocationUpdateService : Service() {
         }
     }
 
-    private lateinit var locationClient: LocationClient
-    private lateinit var airportClient: AirportClient
     private lateinit var db: AirportsDatabase
+    private lateinit var airportClient: AirportClient
+    private lateinit var weatherClient: WeatherClient
+    private lateinit var locationClient: LocationClient
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -72,15 +72,16 @@ class LocationUpdateService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        db = AirportsDatabase.getDatabase(applicationContext)
-
         locationClient = DefaultLocationClient(
             applicationContext,
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
 
-        airportClient = DefaultAirportClient(applicationContext, db.airportDAO())
+        airportClient =
+            DefaultAirportClient(applicationContext, db.airportDAO(), weatherClient)
 
+        db = AirportsDatabase.getDatabase(applicationContext)
+        weatherClient = DefaultWeatherClient(applicationContext)
         isRunning = true
     }
 
@@ -100,65 +101,28 @@ class LocationUpdateService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private suspend fun updateData(complicationData: ComplicationsDataStore, initialLoad: Boolean) {
+    private fun broadcastLocationUpdate(location: Location) {
+        val intent = Intent(UPDATE_LOCATION_DATA_ACTION)
+        intent.putExtra(
+            LOCATION_UPDATE,
+            location
+        )
+        sendBroadcast(intent)
+    }
+
+    private suspend fun updateData(locationServiceData: LocationService, initialLoad: Boolean) {
         Log.d(TAG, "Updating data and notifying complications")
-        Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
+        Log.d(TAG, "Nearest Airport: ${locationServiceData.ident}")
 
         applicationContext.complicationsDataStore.updateData {
             it.copy(
-                complicationsDataStore = complicationData
+                locationServiceDataStore = locationServiceData
             )
         }
 
-        if (!initialLoad) {
-            return
-        }
-
-        ComplicationDataSourceUpdateRequester
-            .create(
-                context = applicationContext,
-                complicationDataSourceComponent = ComponentName(
-                    applicationContext,
-                    DistanceComplicationService::class.java
-                )
-            )
-            .requestUpdateAll()
-
-        ComplicationDataSourceUpdateRequester
-            .create(
-                context = applicationContext,
-                complicationDataSourceComponent = ComponentName(
-                    applicationContext,
-                    IDENTComplicationService::class.java
-                )
-            )
-            .requestUpdateAll()
-
-        ComplicationDataSourceUpdateRequester
-            .create(
-                context = applicationContext,
-                complicationDataSourceComponent = ComponentName(
-                    applicationContext,
-                    TempComplicationService::class.java
-                )
-            )
-            .requestUpdateAll()
-
-        ComplicationDataSourceUpdateRequester
-            .create(
-                context = applicationContext,
-                complicationDataSourceComponent = ComponentName(
-                    applicationContext,
-                    WindComplicationService::class.java
-                )
-            )
-            .requestUpdateAll()
-    }
-
-    private suspend fun showToast(message: String) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
-        }
+        // Broadcast the location update
+        broadcastLocationUpdate(locationServiceData.location)
+        Utilities.requestComplicationUpdate(applicationContext, initialLoad)
     }
 
     @SuppressLint("WearRecents")
@@ -176,24 +140,22 @@ class LocationUpdateService : Service() {
                 nearestAirportFlow
                     .catch { e ->
                         e.printStackTrace()
-                        showToast("Error: ${e.message}")
+                        Utilities.showToast("Error: ${e.message}", applicationContext)
                     }
-                    .onEach { (airport, weatherData) ->
+                    .onEach { airport ->
 
                         val nearestAirport = airport.nearestAirport
 
-                        val newComplicationData = ComplicationsDataStore(
+                        val newComplicationData = LocationService(
                             ident = nearestAirport.ident,
+                            location = locationData.location,
                             distance = airport.distance,
-                            temperature = weatherData.temp,
-                            dewPoint = weatherData.dewPt,
-                            windSpeed = weatherData.windSpeed,
-                            windDirection = weatherData.windDirection
                         )
 
-                        Log.v(TAG, "New Complication Data: $newComplicationData")
+                        Log.d(TAG, "New Location Data: ${newComplicationData.toText()}")
 
                         updateData(newComplicationData, locationData.initialLoad)
+
                     }.launchIn(serviceScope)
             }
             .launchIn(serviceScope)

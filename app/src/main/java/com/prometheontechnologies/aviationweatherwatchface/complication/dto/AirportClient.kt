@@ -4,6 +4,6 @@ import android.location.Location
 import kotlinx.coroutines.flow.Flow
 
 interface AirportClient {
-    fun getAirportUpdates(currentLocation: Location): Flow<Pair<NearestAirport, WeatherData>>
+    fun getAirportUpdates(currentLocation: Location): Flow<NearestAirport>
     class AirportNotAvailableException(message: String) : Exception()
 }

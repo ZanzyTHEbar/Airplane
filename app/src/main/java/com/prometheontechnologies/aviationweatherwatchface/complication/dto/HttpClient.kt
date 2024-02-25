@@ -1,6 +1,5 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.services
+package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.APIModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,7 +8,6 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface WeatherApi {
-
     companion object {
         private const val BASE_URL = "https://aviationweather.gov"
 

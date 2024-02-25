@@ -8,10 +8,8 @@ data class DefaultLocationClientData(
     val location: Location
 )
 
-
 interface LocationClient {
     fun getLocationUpdates(interval: Long): Flow<DefaultLocationClientData>
 
     class LocationNotAvailableException(message: String) : Exception()
-
 }

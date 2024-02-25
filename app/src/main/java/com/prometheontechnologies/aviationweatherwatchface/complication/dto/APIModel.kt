@@ -1,5 +1,7 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
+import kotlinx.serialization.Serializable
+
 /*
 * This is the model class for the API
 * @description: This is an example of a response from the weather API
@@ -92,6 +94,7 @@ data class APIModel(
     val clouds: List<Cloud>
 )
 
+@Serializable
 data class Cloud(
     val cover: String,
     val base: Int
