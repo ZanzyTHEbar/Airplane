@@ -3,7 +3,6 @@ package com.prometheontechnologies.aviationweatherwatchface.complication.api
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.content.Context
-import android.location.Location
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
@@ -14,6 +13,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.DefaultLocationClientData
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.hasLocationPermissions
 import kotlinx.coroutines.channels.awaitClose
@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+
 
 class DefaultLocationClient(
     private val context: Context,
@@ -32,7 +33,7 @@ class DefaultLocationClient(
     }
 
     @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<Location> {
+    override fun getLocationUpdates(interval: Long): Flow<DefaultLocationClientData> {
         return callbackFlow {
             if (!context.hasLocationPermissions()) {
                 throw LocationClient.LocationNotAvailableException("Location permissions not granted")
@@ -92,10 +93,33 @@ class DefaultLocationClient(
                 override fun onLocationResult(locationResult: LocationResult) {
                     super.onLocationResult(locationResult)
                     locationResult.locations.lastOrNull()?.let { location ->
-                        launch { send(location) }
+                        launch {
+                            val clientData = DefaultLocationClientData(
+                                initialLoad = false,
+                                location = location
+                            )
+                            send(clientData)
+                        }
                     }
                 }
             }
+
+            client
+                .lastLocation
+                .addOnSuccessListener { location ->
+                    location?.let {
+                        launch {
+                            val clientData = DefaultLocationClientData(
+                                initialLoad = true,
+                                location = it
+                            )
+                            send(clientData)
+                        }
+                    }
+                }.addOnFailureListener {
+                    Log.e(TAG, "Error getting last location", it)
+                    throw LocationClient.LocationNotAvailableException("Error getting last location")
+                }
 
             client.requestLocationUpdates(
                 locationRequest,

@@ -3,6 +3,7 @@ package com.prometheontechnologies.aviationweatherwatchface.complication.service
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.Service
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.location.Location
@@ -10,12 +11,17 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.wear.watchface.complications.datasource.ComplicationDataSourceUpdateRequester
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.activities.NotificationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultAirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultLocationClient
+import com.prometheontechnologies.aviationweatherwatchface.complication.complications.DistanceComplicationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.complications.IDENTComplicationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.complications.TempComplicationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.complications.WindComplicationService
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
@@ -94,7 +100,7 @@ class LocationUpdateService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private suspend fun updateData(complicationData: ComplicationsDataStore) {
+    private suspend fun updateData(complicationData: ComplicationsDataStore, initialLoad: Boolean) {
         Log.d(TAG, "Updating data and notifying complications")
         Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
 
@@ -104,7 +110,49 @@ class LocationUpdateService : Service() {
             )
         }
 
-        //LocationDataSingleton.updateLocationData(complicationData)
+        if (!initialLoad) {
+            return
+        }
+
+        ComplicationDataSourceUpdateRequester
+            .create(
+                context = applicationContext,
+                complicationDataSourceComponent = ComponentName(
+                    applicationContext,
+                    DistanceComplicationService::class.java
+                )
+            )
+            .requestUpdateAll()
+
+        ComplicationDataSourceUpdateRequester
+            .create(
+                context = applicationContext,
+                complicationDataSourceComponent = ComponentName(
+                    applicationContext,
+                    IDENTComplicationService::class.java
+                )
+            )
+            .requestUpdateAll()
+
+        ComplicationDataSourceUpdateRequester
+            .create(
+                context = applicationContext,
+                complicationDataSourceComponent = ComponentName(
+                    applicationContext,
+                    TempComplicationService::class.java
+                )
+            )
+            .requestUpdateAll()
+
+        ComplicationDataSourceUpdateRequester
+            .create(
+                context = applicationContext,
+                complicationDataSourceComponent = ComponentName(
+                    applicationContext,
+                    WindComplicationService::class.java
+                )
+            )
+            .requestUpdateAll()
     }
 
     private suspend fun showToast(message: String) {
@@ -118,12 +166,12 @@ class LocationUpdateService : Service() {
         locationClient
             .getLocationUpdates(TimeUnit.MINUTES.toMillis(1))
             .catch { e -> e.printStackTrace() }
-            .onEach { location ->
+            .onEach { locationData ->
 
-                Log.d(TAG, location.toText())
+                Log.d(TAG, locationData.location.toText())
                 Log.d(TAG, "Handling location update")
 
-                val nearestAirportFlow = airportClient.getAirportUpdates(location)
+                val nearestAirportFlow = airportClient.getAirportUpdates(locationData.location)
 
                 nearestAirportFlow
                     .catch { e ->
@@ -145,7 +193,7 @@ class LocationUpdateService : Service() {
 
                         Log.v(TAG, "New Complication Data: $newComplicationData")
 
-                        updateData(newComplicationData)
+                        updateData(newComplicationData, locationData.initialLoad)
                     }.launchIn(serviceScope)
             }
             .launchIn(serviceScope)
