@@ -8,7 +8,6 @@ import androidx.wear.watchface.complications.datasource.SuspendingComplicationDa
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
 import kotlinx.coroutines.flow.first
 import kotlin.math.roundToInt
 
@@ -35,11 +34,12 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val complicationData: ComplicationsDataStore =
-            applicationContext.complicationsDataStore.data.first().complicationsDataStore
+        val distance =
+            applicationContext.complicationsDataStore.data.first().complicationsDataStore.distance
 
-        val distance = complicationData.distance / NAUTICAL_MILES_CONSTANT
-        val text = "${distance.roundToInt()}${UNIT}"
+
+        val nauticalMiles = distance / NAUTICAL_MILES_CONSTANT
+        val text = "${nauticalMiles.roundToInt()}${UNIT}"
 
         return Utilities.presentComplicationViews(
             this,
@@ -54,6 +54,7 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
     override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
         super.onComplicationActivated(complicationInstanceId, type)
         Log.d(TAG, "Complication Activated: $complicationInstanceId")
+
     }
 
     override fun onComplicationDeactivated(complicationInstanceId: Int) {

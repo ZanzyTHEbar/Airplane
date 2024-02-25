@@ -74,6 +74,7 @@ abstract class AirportsDatabase : RoomDatabase() {
                     "$AIRPORTS_DB_NAME.db"
                 )
                     .createFromAsset("database/airports.sqlite")
+                    .fallbackToDestructiveMigration()
                     .build()
             }
             return mINSTANCE as AirportsDatabase

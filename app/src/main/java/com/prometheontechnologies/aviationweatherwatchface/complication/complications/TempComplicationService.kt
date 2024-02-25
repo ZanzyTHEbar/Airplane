@@ -9,7 +9,6 @@ import androidx.wear.watchface.complications.datasource.SuspendingComplicationDa
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
 import kotlinx.coroutines.flow.first
 
 class TempComplicationService : SuspendingComplicationDataSourceService() {
@@ -27,10 +26,16 @@ class TempComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        val complicationData: ComplicationsDataStore =
+        val dataStore =
             applicationContext.complicationsDataStore.data.first().complicationsDataStore
 
-        val text = "${complicationData.temperature}/${complicationData.dewPoint}${UNIT}"
+        val temp =
+            dataStore.temperature
+
+        val dewPoint =
+            dataStore.dewPoint
+
+        val text = "${temp}/${dewPoint}${UNIT}"
 
         return Utilities.presentComplicationViews(
             this,

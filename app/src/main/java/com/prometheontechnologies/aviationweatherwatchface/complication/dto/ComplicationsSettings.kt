@@ -1,5 +1,6 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,6 +23,7 @@ data class UserPreferences(
 
 @Serializable
 data class ComplicationsDataStore(
+    @PrimaryKey
     val ident: String = "",
     val distance: Double = 0.0,
     val temperature: Double = 0.0,

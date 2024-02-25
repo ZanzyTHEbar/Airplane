@@ -29,7 +29,10 @@ class WindComplicationService : SuspendingComplicationDataSourceService() {
         val complicationData: ComplicationsDataStore =
             applicationContext.complicationsDataStore.data.first().complicationsDataStore
 
-        val text = "${complicationData.windSpeed}nts/${complicationData.windDirection}°"
+        val windSpeed = complicationData.windSpeed
+        val windDirection = complicationData.windDirection
+
+        val text = "${windSpeed}kts/${windDirection}°"
 
         return Utilities.presentComplicationViews(
             this,
@@ -51,7 +54,7 @@ class WindComplicationService : SuspendingComplicationDataSourceService() {
     }
 
     companion object {
-        private val TAG = TempComplicationService::class.java.simpleName
+        private val TAG = WindComplicationService::class.java.simpleName
         private const val description = "Wind"
         private const val placeHolder = "23/15"
     }

@@ -133,7 +133,7 @@ fun CardWidget(
     AppCard(
         modifier = modifier,
         appName = { Text("Aviation Weather Watchface", color = Color.White) },
-        title = { Text("Location Perms Set.", color = Color.Yellow) },
+        title = { Text("Location Perms Set", color = Color.Yellow) },
         onClick = {}
     ) {
         Column(
@@ -144,7 +144,7 @@ fun CardWidget(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Manage the Location service from here.",
+                text = "Manage the Location service from here",
                 color = Color.White
             )
             Spacer(modifier = Modifier.size(5.dp))
@@ -157,13 +157,13 @@ fun CardWidget(
                 )
                 Spacer(modifier = Modifier.size(5.dp))
                 Text(
-                    text = "It is recommended to grant 'All the time' for the best experience. ",
+                    text = "It is recommended to grant 'All the time' for the best experience ",
                     color = Color.Yellow
                 )
             }
             Spacer(modifier = Modifier.size(5.dp))
             Text(
-                text = "You can manually enable or disable location updates from here. ",
+                text = "You can manually enable or disable location updates from here ",
                 color = Color.Cyan
             )
             Spacer(modifier = Modifier.size(15.dp))
@@ -174,16 +174,35 @@ fun CardWidget(
             Row(horizontalArrangement = Arrangement.Center) {
                 ButtonLocationEnable(
                     onClick = {
+                        if (LocationUpdateService.isRunning) {
+                            Toast.makeText(
+                                context,
+                                "Location Updates already running",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ButtonLocationEnable
+                        }
                         Intent(context, LocationUpdateService::class.java).apply {
                             action =
                                 LocationUpdateService.Companion.ActionType.START.toString()
                             context.startService(this)
                         }
+
+                        Toast.makeText(context, "Location Updates Started", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 ButtonStopLocation(
                     onClick = {
+                        if (!LocationUpdateService.isRunning) {
+                            Toast.makeText(
+                                context,
+                                "Location Updates are not running",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ButtonStopLocation
+                        }
                         Intent(context, LocationUpdateService::class.java).apply {
                             action =
                                 LocationUpdateService.Companion.ActionType.STOP.toString()

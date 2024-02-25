@@ -43,6 +43,8 @@ class LocationUpdateService : Service() {
         const val INTENT_DATA_UPDATE =
             "com.prometheontechnologies.aviationweatherwatchface.complication.action.DATA_UPDATE"
 
+        var isRunning = false
+
         enum class ActionType {
             START,
             STOP
@@ -69,11 +71,14 @@ class LocationUpdateService : Service() {
         )
 
         airportClient = DefaultAirportClient(applicationContext, db.airportDAO())
+
+        isRunning = true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         AirportsDatabase.destroyInstance()
+        isRunning = false
         serviceScope.cancel()
     }
 
@@ -89,17 +94,14 @@ class LocationUpdateService : Service() {
     private suspend fun updateData(complicationData: ComplicationsDataStore) {
         Log.d(TAG, "Updating data and notifying complications")
         Log.d(TAG, "Nearest Airport: ${complicationData.ident}")
-        applicationContext.complicationsDataStore.updateData { currentData ->
-            currentData.copy(complicationsDataStore = complicationData)
+
+        applicationContext.complicationsDataStore.updateData {
+            it.copy(
+                complicationsDataStore = complicationData
+            )
         }
 
-        applicationContext.complicationsDataStore.data.catch { e ->
-            e.printStackTrace()
-            showToast("Error: ${e.message}")
-        }.onEach { complicationsSettingsStore ->
-            val updateComplicationData = complicationsSettingsStore.complicationsDataStore
-            Log.d(TAG, "Complication data updated: $updateComplicationData")
-        }.launchIn(serviceScope)
+        //LocationDataSingleton.updateLocationData(complicationData)
     }
 
     private suspend fun showToast(message: String) {
@@ -121,7 +123,7 @@ class LocationUpdateService : Service() {
             .build()
 
         locationClient
-            .getLocationUpdates(TimeUnit.SECONDS.toMillis(5))
+            .getLocationUpdates(TimeUnit.MINUTES.toMillis(1))
             .catch { e -> e.printStackTrace() }
             .onEach { location ->
 

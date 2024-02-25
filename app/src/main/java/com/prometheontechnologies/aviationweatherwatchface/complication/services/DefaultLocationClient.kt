@@ -60,8 +60,8 @@ class DefaultLocationClient(
                 interval
             )
                 //.setWaitForAccurateLocation(false)
-                .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(1))
-                .setMaxUpdateDelayMillis(TimeUnit.SECONDS.toMillis(30))
+                .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(45))
+                .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(2))
                 .build()
 
             val locationCallback = object : LocationCallback() {
