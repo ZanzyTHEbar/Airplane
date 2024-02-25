@@ -1,8 +1,11 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication
 
+import android.Manifest
 import android.app.PendingIntent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.drawable.Icon
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType
@@ -10,6 +13,16 @@ import androidx.wear.watchface.complications.data.LongTextComplicationData
 import androidx.wear.watchface.complications.data.MonochromaticImage
 import androidx.wear.watchface.complications.data.PlainComplicationText
 import androidx.wear.watchface.complications.data.ShortTextComplicationData
+
+fun Context.hasLocationPermissions(): Boolean {
+    return ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_COARSE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
+}
 
 class Utilities {
     companion object {
@@ -27,7 +40,6 @@ class Utilities {
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(icon)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         }
 
         fun presentComplicationViews(

@@ -1,10 +1,11 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.compose
+package com.prometheontechnologies.aviationweatherwatchface.complication.activities
 
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import com.prometheontechnologies.aviationweatherwatchface.complication.compose.NotificationsPermissionsDialog
 
 class NotificationPermissionsDialogActivity : ComponentActivity() {
     companion object {

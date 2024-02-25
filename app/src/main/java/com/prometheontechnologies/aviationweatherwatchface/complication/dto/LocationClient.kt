@@ -1,4 +1,4 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.services
+package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
 import android.location.Location
 import kotlinx.coroutines.flow.Flow

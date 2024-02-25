@@ -14,7 +14,6 @@
     <string name="app_name">Aviation Weather Watchface</string>
 
     <string name="location_service_notification_channel_id">aviation_weather_watchface_location_service</string>
-    <string name="complication_data_updated">com.prometheontechnologies.aviationweatherwatchface.AIRPORT_DATA_UPDATED</string>
 
     <!--<string name="user_denied_remote_permission">User denied permission on remote device.</string>
     <string name="user_approved_remote_permission">User approved permission on remote device, requesting data again.</string>
@@ -30,23 +29,11 @@
     Location Preferences
     -->
 
-    <string name="no_location_text">No location Data could be resolved</string>
-    <string name="complications_label">Aviation Weather Watchface Data Provider</string>
-
     <!--
     Time Complication Preferences
     -->
 
-    <string name="time_comp_name">Time</string>
     <string name="time_comp_desc">Current Time</string>
-    <string name="time_setting_leading_zero_title">Leading zero</string>
-    <string name="time_setting_leading_zero_summary_on" translatable="false">09:00</string>
-    <string name="time_setting_leading_zero_summary_off" translatable="false">9:00</string>
-
-    <string name="time_ampm_setting_preference_category_title">Time / Sun Complication</string>
-    <string name="time_ampm_setting_title">Hour Format</string>
-    <string name="time_ampm_setting_on">24h</string>
-    <string name="time_ampm_setting_off">12h</string>
 
 
     <!--
@@ -58,8 +45,6 @@
     <string name="temp_complication_name">Aviation Weather Temperature</string>
     <string name="time_complication_name">Aviation Weather Zulu Time</string>
     <string name="wind_complication_name">Aviation Weather Wind</string>
-    <string name="location_permission_message">Please enable perms to use this provider.</string>
-    <string name="location_permission_title">Location Perms</string>
     <string name="title_activity_location_permissions_dialog">Aviation Weather Manager</string>
     <string name="title_activity_notifications_permissions_dialog">Aviation Weather Notifications Dialog</string>
 </resources>

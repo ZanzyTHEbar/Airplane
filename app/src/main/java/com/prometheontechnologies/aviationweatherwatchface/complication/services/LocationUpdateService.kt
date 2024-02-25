@@ -9,13 +9,18 @@ import android.location.Location
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.compose.NotificationPermissionsDialogActivity
+import com.prometheontechnologies.aviationweatherwatchface.complication.activities.NotificationPermissionsDialogActivity
+import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultAirportClient
+import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultLocationClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -40,8 +45,6 @@ fun Location?.toText(): String {
 class LocationUpdateService : Service() {
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
-        const val INTENT_DATA_UPDATE =
-            "com.prometheontechnologies.aviationweatherwatchface.complication.action.DATA_UPDATE"
 
         var isRunning = false
 
@@ -112,16 +115,6 @@ class LocationUpdateService : Service() {
 
     @SuppressLint("WearRecents")
     private fun start() {
-        val notification = Utilities.notificationBuilder(
-            this,
-            getString(R.string.location_service_notification_channel_id),
-            "Aviation Weather Watchface",
-            "Location updates are active",
-            android.R.drawable.ic_dialog_info
-        )
-            .setOngoing(true)
-            .build()
-
         locationClient
             .getLocationUpdates(TimeUnit.MINUTES.toMillis(1))
             .catch { e -> e.printStackTrace() }
@@ -160,15 +153,26 @@ class LocationUpdateService : Service() {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notifsEnabled = notificationManager.areNotificationsEnabled()
+        val notificationsEnabled = notificationManager.areNotificationsEnabled()
 
-        if (!notifsEnabled) {
+        if (!notificationsEnabled) {
             // Request perms from the user
             val intent = Intent(this, NotificationPermissionsDialogActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             startActivity(intent)
             this.stop()
         }
+
+        val notification = Utilities.notificationBuilder(
+            this,
+            getString(R.string.location_service_notification_channel_id),
+            "Aviation Weather Watchface",
+            "Location updates are active",
+            android.R.drawable.ic_dialog_info
+        )
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOngoing(true)
+            .build()
 
         startForeground(100, notification)
         notificationManager.notify(100, notification)

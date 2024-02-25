@@ -23,7 +23,7 @@ class MainApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val channel = NotificationChannel(
+        val locationChannel = NotificationChannel(
             getString(R.string.location_service_notification_channel_id),
             "Location Service",
             NotificationManager.IMPORTANCE_HIGH
@@ -32,6 +32,6 @@ class MainApp : Application() {
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        notificationManager.createNotificationChannel(channel)
+        notificationManager.createNotificationChannel(locationChannel)
     }
 }

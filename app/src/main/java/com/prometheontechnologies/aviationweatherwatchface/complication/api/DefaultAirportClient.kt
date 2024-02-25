@@ -1,15 +1,18 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.services
+package com.prometheontechnologies.aviationweatherwatchface.complication.api
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.util.Log
-import com.prometheontechnologies.aviationweatherwatchface.complication.api.APIModel
-import com.prometheontechnologies.aviationweatherwatchface.complication.api.WeatherApi
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.Airport
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportDAO
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.APIModel
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.NearestAirport
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherData
+import com.prometheontechnologies.aviationweatherwatchface.complication.hasLocationPermissions
+import com.prometheontechnologies.aviationweatherwatchface.complication.services.WeatherApi
+import com.prometheontechnologies.aviationweatherwatchface.complication.services.toText
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.prometheontechnologies.aviationweatherwatchface.complication.hasLocationPermissions
 import com.prometheontechnologies.aviationweatherwatchface.complication.services.LocationUpdateService
-import com.prometheontechnologies.aviationweatherwatchface.complication.services.hasLocationPermissions
 
 class RebootReceiver : BroadcastReceiver() {
 

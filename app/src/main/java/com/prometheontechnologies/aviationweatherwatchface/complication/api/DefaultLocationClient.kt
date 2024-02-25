@@ -1,6 +1,7 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.services
+package com.prometheontechnologies.aviationweatherwatchface.complication.api
 
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.content.Context
 import android.location.Location
 import android.os.Looper
@@ -11,6 +12,10 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
+import com.prometheontechnologies.aviationweatherwatchface.complication.R
+import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationClient
+import com.prometheontechnologies.aviationweatherwatchface.complication.hasLocationPermissions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -42,25 +47,44 @@ class DefaultLocationClient(
 
             if (!isGpsEnabled && !isNetworkEnabled) {
                 val message =
-                    "This hardware doesn't have GPS or it is disabled, enable it or pair with your phone to receive location information."
+                    "This hardware doesn't have GPS or it is disabled"
                 Log.e(TAG, message)
-                val toast = Toast.makeText(
+
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+                if (!notificationManager.areNotificationsEnabled()) {
+                    Toast.makeText(
+                        context,
+                        message,
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                val notification = Utilities.notificationBuilder(
                     context,
-                    message,
-                    Toast.LENGTH_LONG
+                    context.getString(R.string.location_service_notification_channel_id),
+                    "Location not available",
+                    "$message enable it or pair with your phone to receive location information.",
+                    android.R.drawable.ic_dialog_alert
                 )
-                toast.show()
+                    .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                    .setColor(context.getColor(android.R.color.holo_orange_dark))
+                    .build()
+
+                notificationManager.notify(101, notification)
+
                 throw LocationClient.LocationNotAvailableException(message)
             }
 
-
-            // TODO: Set to PRIORITY_BALANCED_POWER_ACCURACY for production and 5 minutes for interval
             val locationRequest = LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
                 interval
             )
                 //.setWaitForAccurateLocation(false)
                 .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(45))
+                // set the min update distance to 2 nautical miles
+                .setMinUpdateDistanceMeters(3704f)
                 .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(2))
                 .build()
 

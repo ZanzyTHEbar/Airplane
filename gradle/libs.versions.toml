@@ -37,7 +37,7 @@ ksp = "1.9.22-1.0.17"
 # @keep
 lifecycle = "2.7.0"
 # @keep
-minSdk = "29"
+minSdk = "33"
 monitor = "1.6.1"
 pagingCompose = "3.3.0-alpha03"
 profileInstaller = "1.3.1"

@@ -12,7 +12,6 @@
      limitations under the License.
 -->
 <resources>
-    <string name="device_shape">Round Device</string>
     <string name="distance_complication_name">Aviation Weather Distance</string>
     <string name="ident_complication_name">Aviation Weather IDENT</string>
     <string name="temp_complication_name">Aviation Weather Temperature</string>

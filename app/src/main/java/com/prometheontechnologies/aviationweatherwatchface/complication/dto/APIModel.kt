@@ -1,4 +1,4 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.api
+package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
 /*
 * This is the model class for the API

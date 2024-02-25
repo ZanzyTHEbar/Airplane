@@ -22,6 +22,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.prometheontechnologies.aviationweatherwatchface.complication.activities.LocationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.theme.AviationWeatherWatchFaceTheme
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)

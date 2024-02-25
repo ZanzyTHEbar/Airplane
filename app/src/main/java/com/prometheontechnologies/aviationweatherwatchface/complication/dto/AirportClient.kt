@@ -1,8 +1,6 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.services
+package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
 import android.location.Location
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.NearestAirport
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherData
 import kotlinx.coroutines.flow.Flow
 
 interface AirportClient {

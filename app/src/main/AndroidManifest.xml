@@ -158,7 +158,7 @@
         </service>
 
         <activity
-            android:name=".compose.LocationPermissionsDialogActivity"
+            android:name=".activities.LocationPermissionsDialogActivity"
             android:exported="true"
             android:label="@string/title_activity_location_permissions_dialog"
             android:taskAffinity=""
@@ -176,7 +176,7 @@
         </activity>
 
         <activity
-            android:name=".compose.NotificationPermissionsDialogActivity"
+            android:name=".activities.NotificationPermissionsDialogActivity"
             android:exported="true"
             android:label="@string/title_activity_notifications_permissions_dialog"
             android:taskAffinity=""

@@ -1,5 +1,6 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.api
+package com.prometheontechnologies.aviationweatherwatchface.complication.services
 
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.APIModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
