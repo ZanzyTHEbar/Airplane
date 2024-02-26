@@ -1,5 +1,6 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.WdirSerializer
 import kotlinx.serialization.Serializable
 
 /*
@@ -56,6 +57,8 @@ import kotlinx.serialization.Serializable
     }
 ]
 * */
+
+@Serializable
 data class APIModel(
     val metar_id: Long,
     val icaoId: String,
@@ -64,7 +67,8 @@ data class APIModel(
     val reportTime: String,
     val temp: Double,
     val dewp: Double,
-    val wdir: Int,
+    @Serializable(with = WdirSerializer::class)
+    val wdir: Double,
     val wspd: Int,
     val wgst: Int?,
     val visib: String,
@@ -72,7 +76,8 @@ data class APIModel(
     val slp: Double,
     val qcField: Int,
     val wxString: String?,
-    val presTend: String?,
+    @Serializable(with = WdirSerializer::class)
+    val presTend: Double?,
     val maxT: Double?,
     val minT: Double?,
     val maxT24: Double?,

@@ -1,9 +1,12 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.dto
 
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,7 +14,11 @@ interface WeatherApi {
     companion object {
         private const val BASE_URL = "https://aviationweather.gov"
 
+        private var json: Json = Json {
+            ignoreUnknownKeys = true
+        }
 
+        @OptIn(ExperimentalSerializationApi::class)
         val apiInstance: WeatherApi = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(
@@ -22,7 +29,7 @@ interface WeatherApi {
                     )
                     .build()
             )
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
             .create(WeatherApi::class.java)
     }
@@ -44,7 +51,4 @@ interface WeatherApi {
         @Query("format") format: String,
         @Query("bbox") bbox: String
     ): List<APIModel>
-
-    //@GET("/taf")
-    //suspend fun getTafDetails(@Query("lat") lat: Double,@Query("lon") long: Double,@Query("appid") appid: String): WeatherDTO
 }

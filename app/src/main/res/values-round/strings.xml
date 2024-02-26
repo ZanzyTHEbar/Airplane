@@ -17,4 +17,5 @@
     <string name="temp_complication_name">Aviation Weather Temperature</string>
     <string name="time_complication_name">Aviation Weather Zulu Time</string>
     <string name="wind_complication_name">Aviation Weather Wind</string>
+    <string name="title_activity_app_manager_dialog">Avaition Weather Manager</string>
 </resources>

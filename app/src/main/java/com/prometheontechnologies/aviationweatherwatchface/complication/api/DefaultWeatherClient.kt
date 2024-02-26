@@ -1,6 +1,5 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.api
 
-import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -31,9 +30,6 @@ class DefaultWeatherClient(private val context: Context) : WeatherClient {
 
             Log.e(TAG, message)
 
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
             val notification = Utilities.notificationBuilder(
                 context,
                 context.getString(R.string.location_service_notification_channel_id),
@@ -44,7 +40,11 @@ class DefaultWeatherClient(private val context: Context) : WeatherClient {
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setOngoing(false)
                 .build()
-            notificationManager.notify(103, notification)
+            Utilities.notificationManagerBuilder(
+                context,
+                null
+            ).notify(103, notification)
+
             return Result.failure(WeatherClient.WeatherNotAvailableException(message))
         }
 
@@ -70,6 +70,8 @@ class DefaultWeatherClient(private val context: Context) : WeatherClient {
                         clouds = apiData.clouds
                     )
                 ).getOrThrow()
+
+                Log.d(TAG, "Weather updates flow sent: $data")
                 trySend(data).isSuccess
             }
 

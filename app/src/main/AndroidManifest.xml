@@ -55,6 +55,7 @@
             </intent-filter>-->
         </service>
 
+
         <receiver
             android:name=".receivers.RebootReceiver"
             android:enabled="true"
@@ -62,8 +63,6 @@
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-
-                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
@@ -179,6 +178,17 @@
             android:name=".activities.NotificationPermissionsDialogActivity"
             android:exported="true"
             android:label="@string/title_activity_notifications_permissions_dialog"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.DeviceDefault">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
+        <activity
+            android:name=".activities.AppManagerActivity"
+            android:exported="true"
+            android:label="@string/title_activity_app_manager_dialog"
             android:taskAffinity=""
             android:theme="@android:style/Theme.DeviceDefault">
             <meta-data

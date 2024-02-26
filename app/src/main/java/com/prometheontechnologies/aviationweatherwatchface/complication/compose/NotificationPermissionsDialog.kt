@@ -3,8 +3,6 @@ package com.prometheontechnologies.aviationweatherwatchface.complication.compose
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +23,6 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.prometheontechnologies.aviationweatherwatchface.complication.activities.LocationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.theme.AviationWeatherWatchFaceTheme
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun NotificationsPermissionsDialog(

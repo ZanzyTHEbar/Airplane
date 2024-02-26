@@ -7,8 +7,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import kotlinx.coroutines.flow.first
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.LocalDataRepository
 import kotlin.math.roundToInt
 
 class DistanceComplicationService : SuspendingComplicationDataSourceService() {
@@ -34,9 +33,10 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
             request.complicationInstanceId
         )*/
 
-        val distance =
-            applicationContext.complicationsDataStore.data.first().complicationsDataStore.distance
+        /*val distance =
+            applicationContext.complicationsDataStore.data.first().locationServiceDataStore.distance*/
 
+        val distance = LocalDataRepository.locationData.value?.distance ?: 0.0
 
         val nauticalMiles = distance / NAUTICAL_MILES_CONSTANT
         val text = "${nauticalMiles.roundToInt()}${UNIT}"

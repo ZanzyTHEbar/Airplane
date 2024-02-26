@@ -8,8 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ComplicationsSettingsStore(
     val userPreferences: UserPreferences = UserPreferences(),
-    val locationServiceDataStore: LocationService = LocationService(),
-    val weatherServiceDataStore: WeatherService = WeatherService()
 )
 
 /** PREFERENCES **/
@@ -23,7 +21,8 @@ data class UserPreferences(
     val weatherServiceUpdatePeriod: Long = 15,
 
     // User
-    val notificationEnabled: Boolean = true
+    val notificationEnabled: Boolean = true,
+    val flyingMode: Boolean = false
 )
 
 @Serializable
@@ -45,10 +44,14 @@ data class WeatherService(
     val temp: Double = 0.0,
     val dewPt: Double = 0.0,
     val windSpeed: Int = 0,
-    val windDirection: Int = 0,
+    val windDirection: Double = 0.0,
     val sensorTime: String = "",
     val visibility: String = "",
-    val clouds: List<Cloud> = emptyList()
+    val clouds: List<Cloud> = emptyList(),
+    val pressure: Double = 0.0,
+    val densityAltitude: Double = 0.0,
+    val freezingLayer: Int = 0,
+    val cloudLayer: Int = 0,
 ) {
     fun toText(): String {
         return "Temperature: $temp\n" +

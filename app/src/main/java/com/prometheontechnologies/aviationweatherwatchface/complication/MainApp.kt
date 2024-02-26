@@ -15,7 +15,6 @@ import android.content.Context
 * The complications are updated by the AirportService, which sends the data to the complications using binding.
 * */
 class MainApp : Application() {
-
     companion object {
         private val TAG = MainApp::class.java.simpleName
     }

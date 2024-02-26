@@ -7,8 +7,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import kotlinx.coroutines.flow.first
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.LocalDataRepository
 
 class IDENTComplicationService : SuspendingComplicationDataSourceService() {
 
@@ -25,8 +24,10 @@ class IDENTComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        val ident =
-            applicationContext.complicationsDataStore.data.first().complicationsDataStore.ident
+        /* val ident =
+             applicationContext.complicationsDataStore.data.first().locationServiceDataStore.ident*/
+
+        val ident = LocalDataRepository.locationData.value?.ident ?: "N/A"
 
         return Utilities.presentComplicationViews(
             this,

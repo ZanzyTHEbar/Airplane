@@ -20,6 +20,7 @@ import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.prometheontechnologies.aviationweatherwatchface.complication.activities.AppManagerActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.activities.NotificationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.theme.AviationWeatherWatchFaceTheme
 
@@ -66,17 +67,20 @@ fun PermissionsDialog(
             item { Spacer(modifier = Modifier.padding(20.dp)) }
 
             if (locationPermissionsState.allPermissionsGranted) {
-                item {
-                    CardWidget(context, contentModifier, backGroundPermissionState)
-                }
+                val intent = Intent(context, AppManagerActivity::class.java)
+
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK
+                context.startActivity(intent)
+
+                // close this activity
+                finish()
             } else {
 
                 val notificationManager =
                     context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-                val notifsEnabled = notificationManager.areNotificationsEnabled()
-
-                if (!notifsEnabled) {
+                if (!notificationManager.areNotificationsEnabled()) {
                     val intent = Intent(context, NotificationPermissionsDialogActivity::class.java)
                     intent.flags =
                         Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK

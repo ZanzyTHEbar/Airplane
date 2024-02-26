@@ -5,7 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsSettingsStore
 
-private const val DATA_STORE_FILE_NAME = "app_data_store.pb"
+private const val DATA_STORE_FILE_NAME = "aviation_weather_prefs.pb"
 
 val Context.complicationsDataStore: DataStore<ComplicationsSettingsStore> by dataStore(
     fileName = DATA_STORE_FILE_NAME,

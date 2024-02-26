@@ -7,9 +7,7 @@ import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
-import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ComplicationsDataStore
-import kotlinx.coroutines.flow.first
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.LocalDataRepository
 
 class WindComplicationService : SuspendingComplicationDataSourceService() {
 
@@ -26,11 +24,10 @@ class WindComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        val complicationData: ComplicationsDataStore =
-            applicationContext.complicationsDataStore.data.first().complicationsDataStore
+        val dataStore = LocalDataRepository.weatherData.value
 
-        val windSpeed = complicationData.windSpeed
-        val windDirection = complicationData.windDirection
+        val windSpeed = dataStore?.windSpeed ?: 0
+        val windDirection = dataStore?.windDirection ?: 0.0
 
         val text = "${windSpeed}kts/${windDirection}°"
 

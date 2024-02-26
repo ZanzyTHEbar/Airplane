@@ -1,9 +1,7 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.services
 
 import android.annotation.SuppressLint
-import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.IBinder
@@ -12,15 +10,15 @@ import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
 import com.prometheontechnologies.aviationweatherwatchface.complication.Utilities
-import com.prometheontechnologies.aviationweatherwatchface.complication.activities.NotificationPermissionsDialogActivity
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultAirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultLocationClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.api.DefaultWeatherClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.AirportsDatabase
-import com.prometheontechnologies.aviationweatherwatchface.complication.data.complicationsDataStore
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.LocalDataRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.AirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.LocationService
+import com.prometheontechnologies.aviationweatherwatchface.complication.dto.ServicesInterface
 import com.prometheontechnologies.aviationweatherwatchface.complication.dto.WeatherClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,21 +40,14 @@ fun Location?.toText(): String {
     }
 }
 
-class LocationUpdateService : Service() {
+class LocationUpdateService : Service(), ServicesInterface {
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
-        const val UPDATE_LOCATION_DATA_ACTION =
+        const val intentACTION =
             "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE"
-
-        const val LOCATION_UPDATE =
-            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE"
-
-        var isRunning = false
-
-        enum class ActionType {
-            START,
-            STOP
-        }
+        const val intentEXTRA =
+            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE_DATA"
+        var isRunning: Boolean = false
     }
 
     private lateinit var db: AirportsDatabase
@@ -72,16 +63,16 @@ class LocationUpdateService : Service() {
     override fun onCreate() {
         super.onCreate()
 
+
         locationClient = DefaultLocationClient(
             applicationContext,
             LocationServices.getFusedLocationProviderClient(applicationContext)
         )
 
-        airportClient =
-            DefaultAirportClient(applicationContext, db.airportDAO(), weatherClient)
-
         db = AirportsDatabase.getDatabase(applicationContext)
         weatherClient = DefaultWeatherClient(applicationContext)
+        airportClient =
+            DefaultAirportClient(applicationContext, db.airportDAO(), weatherClient)
         isRunning = true
     }
 
@@ -94,39 +85,23 @@ class LocationUpdateService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ActionType.START.toString() -> start()
-            ActionType.STOP.toString() -> stop()
+            ServicesInterface.Companion.ActionType.START.toString() -> start()
+            ServicesInterface.Companion.ActionType.STOP.toString() -> stop()
         }
 
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun broadcastLocationUpdate(location: Location) {
-        val intent = Intent(UPDATE_LOCATION_DATA_ACTION)
-        intent.putExtra(
-            LOCATION_UPDATE,
-            location
-        )
-        sendBroadcast(intent)
-    }
+    private fun updateData(locationServiceData: LocationService, initialLoad: Boolean) {
+        Log.v(TAG, "Updating data and notifying complications")
+        Log.v(TAG, "Nearest Airport: ${locationServiceData.ident}")
 
-    private suspend fun updateData(locationServiceData: LocationService, initialLoad: Boolean) {
-        Log.d(TAG, "Updating data and notifying complications")
-        Log.d(TAG, "Nearest Airport: ${locationServiceData.ident}")
-
-        applicationContext.complicationsDataStore.updateData {
-            it.copy(
-                locationServiceDataStore = locationServiceData
-            )
-        }
-
-        // Broadcast the location update
-        broadcastLocationUpdate(locationServiceData.location)
+        LocalDataRepository.updateLocationData(locationServiceData)
         Utilities.requestComplicationUpdate(applicationContext, initialLoad)
     }
 
     @SuppressLint("WearRecents")
-    private fun start() {
+    override fun start() {
         locationClient
             .getLocationUpdates(TimeUnit.MINUTES.toMillis(1))
             .catch { e -> e.printStackTrace() }
@@ -136,6 +111,14 @@ class LocationUpdateService : Service() {
                 Log.d(TAG, "Handling location update")
 
                 val nearestAirportFlow = airportClient.getAirportUpdates(locationData.location)
+
+                // Handle calling the weather worker once on initial load
+
+                /*if (locationData.initialLoad) {
+                    val immediateWorkRequest =
+                        OneTimeWorkRequestBuilder<WeatherUpdateWorker>().build()
+                    WorkManager.getInstance(applicationContext).enqueue(immediateWorkRequest)
+                }*/
 
                 nearestAirportFlow
                     .catch { e ->
@@ -160,19 +143,7 @@ class LocationUpdateService : Service() {
             }
             .launchIn(serviceScope)
 
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val notificationsEnabled = notificationManager.areNotificationsEnabled()
-
-        if (!notificationsEnabled) {
-            // Request perms from the user
-            val intent = Intent(this, NotificationPermissionsDialogActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            this.stop()
-        }
-
+        // Call notification handler builder
         val notification = Utilities.notificationBuilder(
             this,
             getString(R.string.location_service_notification_channel_id),
@@ -185,10 +156,14 @@ class LocationUpdateService : Service() {
             .build()
 
         startForeground(100, notification)
-        notificationManager.notify(100, notification)
+
+        Utilities.notificationManagerBuilder(
+            this,
+            this
+        ).notify(100, notification)
     }
 
-    private fun stop() {
+    override fun stop() {
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

@@ -93,7 +93,8 @@ dependencies {
 
     // Retrofit
     implementation libs.retrofit.converter.gson
-    implementation libs.retrofit2
+    implementation libs.retrofit2.kotlinx.serialization.converter
+    implementation libs.retrofit2x
 
     // OkHttp3
     implementation libs.okhttp3x
@@ -168,8 +169,6 @@ dependencies {
     androidTestImplementation platform(libs.androidx.compose.bom)
     debugImplementation libs.ui.test.manifest
     ksp libs.androidx.room.compiler
-
-    implementation libs.android.permissions
 
     // Testing and Debugging
     testImplementation libs.junit
