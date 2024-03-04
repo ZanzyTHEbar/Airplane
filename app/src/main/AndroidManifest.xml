@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enableOnBackInvokedCallback="true">
 
     <uses-feature android:name="android.hardware.type.watch" />
     <uses-feature android:name="android.hardware.location.gps" />
@@ -26,9 +27,8 @@
 
     <application
         android:name=".MainApp"
-        android:allowBackup="true"
         android:directBootAware="true"
-        android:icon="@mipmap/airlines_round"
+        android:icon="@drawable/airlines_foreground"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
@@ -46,7 +46,7 @@
 
 
         <service
-            android:name=".services.LocationUpdateService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.location.LocationUpdateService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location">
@@ -57,7 +57,7 @@
 
 
         <receiver
-            android:name=".receivers.RebootReceiver"
+            android:name=".utils.RebootReceiver"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
@@ -66,8 +66,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".utils.WakeReceiver" />
+
         <service
-            android:name=".complications.DistanceComplicationService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.DistanceComplicationService"
             android:exported="true"
             android:icon="@drawable/ic_distance"
             android:label="@string/distance_complication_name"
@@ -85,7 +87,25 @@
         </service>
 
         <service
-            android:name=".complications.IDENTComplicationService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.FreezingLevelComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_temp"
+            android:label="@string/distance_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.IDENTComplicationService"
             android:exported="true"
             android:icon="@drawable/baseline_badge_24"
             android:label="@string/ident_complication_name"
@@ -103,7 +123,7 @@
         </service>
 
         <service
-            android:name=".complications.TempComplicationService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.TempComplicationService"
             android:exported="true"
             android:icon="@drawable/ic_temp"
             android:label="@string/temp_complication_name"
@@ -121,7 +141,7 @@
         </service>
 
         <service
-            android:name=".complications.TimeComplicationService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.TimeComplicationService"
             android:exported="true"
             android:icon="@drawable/ic_clock"
             android:label="@string/time_complication_name"
@@ -139,7 +159,7 @@
         </service>
 
         <service
-            android:name=".complications.WindComplicationService"
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.WindComplicationService"
             android:exported="true"
             android:icon="@drawable/wind_foreground"
             android:label="@string/wind_complication_name"
@@ -157,8 +177,9 @@
         </service>
 
         <activity
-            android:name=".activities.LocationPermissionsDialogActivity"
+            android:name=".MainActivity"
             android:exported="true"
+            android:icon="@drawable/airlines_foreground"
             android:label="@string/title_activity_location_permissions_dialog"
             android:taskAffinity=""
             android:theme="@android:style/Theme.DeviceDefault">
@@ -174,8 +195,8 @@
                 android:value="" />
         </activity>
 
-        <activity
-            android:name=".activities.NotificationPermissionsDialogActivity"
+        <!--<activity
+            android:name=".ui.NotificationPermissionsDialogActivity"
             android:exported="true"
             android:label="@string/title_activity_notifications_permissions_dialog"
             android:taskAffinity=""
@@ -186,7 +207,7 @@
         </activity>
 
         <activity
-            android:name=".activities.AppManagerActivity"
+            android:name=".features.settings.ui.AppManagerActivity"
             android:exported="true"
             android:label="@string/title_activity_app_manager_dialog"
             android:taskAffinity=""
@@ -194,7 +215,7 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
-        </activity>
+        </activity>-->
 
     </application>
 

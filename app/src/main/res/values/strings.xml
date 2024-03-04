@@ -48,4 +48,9 @@
     <string name="title_activity_location_permissions_dialog">Aviation Weather Manager</string>
     <string name="title_activity_notifications_permissions_dialog">Aviation Weather Notifications Dialog</string>
     <string name="title_activity_app_manager_dialog">Aviation Weather Manager</string>
+    <string name="state_start_text">START</string>
+    <string name="state_active_text">ACTIVE</string>
+    <string name="state_pause_text">PAUSE</string>
+    <string name="state_resume_text">RESUME</string>
+    <string name="state_stop_text">STOP</string>
 </resources>

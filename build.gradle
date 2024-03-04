@@ -23,11 +23,15 @@ plugins {
     alias(libs.plugins.version.catalog.update)
 }
 
+tasks.register('clean-build-dir', Delete) {
+    delete rootProject.buildDir
+}
+
 subprojects {
-    repositories {
+    /*repositories {
         google()
         mavenCentral()
-    }
+    }*/
 
     apply plugin: "com.diffplug.spotless"
 

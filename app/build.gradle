@@ -90,6 +90,7 @@ dependencies {
     implementation libs.androidx.wear.tooling.preview
     implementation libs.androidx.core.ktx
     implementation libs.androidx.constraintlayoutx
+    implementation libs.androidx.media
 
     // Retrofit
     implementation libs.retrofit.converter.gson
@@ -132,6 +133,9 @@ dependencies {
     implementation libs.androidx.compose.navigation
     implementation libs.androidx.compose.ui.tooling
     implementation libs.androidx.paging.compose
+    implementation libs.horologist.composables
+    implementation libs.horologist.compose.layout
+    implementation libs.horologist.compose.material
     implementation platform(libs.androidx.compose.bom)
 
     // Watchface dependencies
@@ -151,7 +155,6 @@ dependencies {
     implementation libs.androidx.lifecycle.service
     implementation libs.ktor.client.android
     implementation libs.androidx.material3.android
-    //implementation libs.androidx.wear.complications.provider
     implementation libs.androidx.watchface.complications.data.source.ktx
 
     implementation libs.androidx.datastore
@@ -166,6 +169,7 @@ dependencies {
     implementation libs.uix
     implementation libs.ui.graphics
     implementation libs.material3
+    implementation libs.androidx.navigation.compose
     androidTestImplementation platform(libs.androidx.compose.bom)
     debugImplementation libs.ui.test.manifest
     ksp libs.androidx.room.compiler

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_200">#ADC0CB</color>
+    <color name="primary_400">#7592A3</color>
+    <color name="primary_800">#344955</color>
+    <color name="primary_500">#5D7F92</color>
+    <color name="primary_700">#425C6A</color>
+    <color name="secondary_800">#F9AA33</color>
+    <color name="secondary_700">#FCC13B</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="orange">#F9AA33</color>
+    <color name="red">#EB5353</color>
+    <color name="yellow">#F9D923</color>
+    <color name="green">#36AE7C</color>
+    <color name="blue">#187498</color>
+
+    <color name="start_color">@color/orange</color>
+    <color name="active_color">@color/green</color>
+    <color name="stop_color">@color/red</color>
+    <color name="resume_color">@color/blue</color>
+    <color name="pause_color">@color/blue</color>
+</resources>

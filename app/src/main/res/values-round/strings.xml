@@ -18,4 +18,9 @@
     <string name="time_complication_name">Aviation Weather Zulu Time</string>
     <string name="wind_complication_name">Aviation Weather Wind</string>
     <string name="title_activity_app_manager_dialog">Avaition Weather Manager</string>
+    <string name="state_start_text">START</string>
+    <string name="state_active_text">ACTIVE</string>
+    <string name="state_pause_text">PAUSE</string>
+    <string name="state_resume_text">RESUME</string>
+    <string name="state_stop_text">STOP</string>
 </resources>

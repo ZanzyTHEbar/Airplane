@@ -5,7 +5,9 @@ androidx-junit = "1.1.5"
 constraintlayout = "2.1.4"
 core-ktx = "1.12.0"
 datastore = "1.0.0"
-gradle = "8.2.2"
+gradle = "8.3.0"
+horologistComposables = "0.6.3"
+horologistComposeLayout = "0.6.3"
 junit = "4.13.2"
 kotlin-stdlib = "1.9.22"
 androidx-activity = "1.8.2"
@@ -18,12 +20,13 @@ ktorClientAndroid = "2.3.8"
 lifecycleService = "2.7.0"
 material = "1.11.0"
 materialIconsExtended = "1.7.0-alpha03"
+media = "1.7.0"
 play-services-location = "21.1.0"
 retrofit = "2.9.0"
 retrofit2KotlinxSerializationConverter = "0.8.0"
 room-runtime = "2.6.1"
 databinding-common = "8.2.2"
-androidGradlePlugin = "8.2.2"
+androidGradlePlugin = "8.3.0"
 # @keep
 compileSdk = "34"
 # @keep
@@ -52,6 +55,7 @@ version-catalog-update = "0.8.4"
 viewModelCompose = "2.7.0"
 work = "2.9.0"
 material3Android = "1.2.0"
+navigationCompose = "2.7.7"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.35.0-alpha" }
@@ -63,6 +67,7 @@ androidx-databinding-common = { group = "androidx.databinding", name = "databind
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-lifecycle-service = { module = "androidx.lifecycle:lifecycle-service", version.ref = "lifecycleService" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+androidx-media = { module = "androidx.media:media", version.ref = "media" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-ui-toolingx = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
@@ -102,6 +107,9 @@ androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
+horologist-composables = { module = "com.google.android.horologist:horologist-composables", version.ref = "horologistComposables" }
+horologist-compose-layout = { module = "com.google.android.horologist:horologist-compose-layout", version.ref = "horologistComposeLayout" }
+horologist-compose-material = { module = "com.google.android.horologist:horologist-compose-material", version.ref = "horologistComposeLayout" }
 io-coil-kt = { module = "io.coil-kt:coil-compose", version = "2.1.0" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
@@ -134,6 +142,7 @@ uix = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

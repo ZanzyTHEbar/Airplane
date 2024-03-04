@@ -1,0 +1,4 @@
+package com.prometheontechnologies.aviationweatherwatchface.complication.features.complications
+
+class VisibilityComplicationService {
+}
