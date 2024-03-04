@@ -67,7 +67,8 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
 
         db = AirportsDatabase.getDatabase(applicationContext)
         weatherClient = DefaultWeatherClient(applicationContext)
-        airportClient = DefaultAirportClient(applicationContext, db.airportDAO(), weatherClient)
+        airportClient =
+            DefaultAirportClient(applicationContext, db.airportDAO(), weatherClient, repository)
 
         serviceState = MutableStateFlow(
             ServicesInterface.Companion.ServiceState(
