@@ -5,11 +5,13 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.LocalDataRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.SettingItem
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.SettingsContextualActions
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.UserPreferences
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.createSettingsList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,14 +74,12 @@ class MainViewModel(private val repository: UserPreferencesRepository) : ViewMod
      ***************************************** UI State Methods ************************************
      ***********************************************************************************************/
 
-    private fun loadSettings() {
-        viewModelScope.launch {
-            try {
-                val settings = createSettingsList()
-                _uiState.value = SettingsUIState.SettingsLoaded(settings)
-            } catch (e: Exception) {
-                _uiState.value = SettingsUIState.Error(e.message ?: "Unknown Error")
-            }
+    private fun loadSettings() = viewModelScope.launch {
+        try {
+            val settings = createSettingsList()
+            _uiState.value = SettingsUIState.SettingsLoaded(settings)
+        } catch (e: Exception) {
+            _uiState.value = SettingsUIState.Error(e.message ?: "Unknown Error")
         }
     }
 
@@ -87,40 +87,38 @@ class MainViewModel(private val repository: UserPreferencesRepository) : ViewMod
         _locationServicesButtonEnabled.value = enabled
     }
 
-    fun updateSwitchesSetting(settingId: Int, checked: Boolean) {
-        viewModelScope.launch {
-            val currentState = _uiState.value
-            if (currentState !is SettingsUIState.SettingsLoaded) return@launch
-            val settingToUpdate = currentState.settings.find { it.id == settingId } ?: return@launch
+    fun updateSwitchesSetting(settingId: Int, checked: Boolean) = viewModelScope.launch {
+        val currentState = _uiState.value
+        if (currentState !is SettingsUIState.SettingsLoaded) return@launch
+        val settingToUpdate = currentState.settings.find { it.id == settingId } ?: return@launch
 
-            if (settingToUpdate.id != settingId && !settingToUpdate.enabled) {
-                return@launch
+        if (settingToUpdate.id != settingId && !settingToUpdate.enabled) {
+            return@launch
+        }
+
+        val updatedSetting = settingToUpdate.copy(
+            checked = checked
+        )
+
+        val updatedSettings = currentState.settings.map { setting ->
+            when (setting.id) {
+                settingId -> updatedSetting
+                else -> setting
             }
+        }
 
-            val updatedSetting = settingToUpdate.copy(
-                checked = checked
-            )
+        updateSettingsUIState(SettingsUIState.SettingsLoaded(updatedSettings))
 
-            val updatedSettings = currentState.settings.map { setting ->
-                when (setting.id) {
-                    settingId -> updatedSetting
-                    else -> setting
-                }
-            }
+        Log.v(
+            TAG,
+            "Setting: $updatedSetting"
+        )
 
-            updateSettingsUIState(SettingsUIState.SettingsLoaded(updatedSettings))
-
-            Log.v(
-                TAG,
-                "Setting: $updatedSetting"
-            )
-
-            when (settingId) {
-                0 -> handleLocationService(checked)
-                2 -> updateFlyMode(checked)
-                3 -> updateEnableMilitary(checked)
-                else -> {}
-            }
+        when (settingId) {
+            0 -> handleLocationService(checked)
+            2 -> updateFlyMode(checked)
+            3 -> updateEnableMilitary(checked)
+            else -> {}
         }
     }
 
@@ -153,19 +151,23 @@ class MainViewModel(private val repository: UserPreferencesRepository) : ViewMod
             enableMilitary = checked
         ) ?: return@launch
 
+        LocalDataRepository.updateMilitaryEnabled(checked)
         saveUserPreference(updatedUserPreferences)
+        restartService()
     }
 
     private fun updateFlyMode(checked: Boolean) = viewModelScope.launch {
         val currentState = _uiState.value
         if (currentState !is SettingsUIState.SettingsLoaded) return@launch
-        val interval = if (checked) 15 else 5
+        val interval = if (checked) 2 else 15
         val updatedUserPreferences = _userPreferences.value?.copy(
             flyingMode = checked,
-            weatherServiceUpdatePeriod = interval.toLong()
+            updatePeriod = interval
         ) ?: return@launch
 
+        LocalDataRepository.updateUpdateInterval(interval)
         saveUserPreference(updatedUserPreferences)
+        restartService()
     }
 
 
@@ -173,17 +175,29 @@ class MainViewModel(private val repository: UserPreferencesRepository) : ViewMod
         val currentState = _uiState.value
         if (currentState !is SettingsUIState.SettingsLoaded) return@launch
 
-        val interval = time.hour * 60 + time.minute
+        val interval = if (time.hour == 0) {
+            time.minute
+        } else {
+            time.hour * 60
+        }
 
         val updatedUserPreferences = _userPreferences.value?.copy(
-            weatherServiceUpdatePeriod = interval.toLong()
+            updatePeriod = interval
         ) ?: return@launch
-
-        saveUserPreference(updatedUserPreferences)
 
         Log.v(
             TAG,
-            "Selected Option: $time"
+            "MainViewModel Interval: $interval"
         )
+
+        LocalDataRepository.updateUpdateInterval(interval)
+        saveUserPreference(updatedUserPreferences)
+        restartService()
+    }
+
+    private suspend fun restartService() {
+        handleLocationService(false)
+        delay(500)
+        handleLocationService(true)
     }
 }

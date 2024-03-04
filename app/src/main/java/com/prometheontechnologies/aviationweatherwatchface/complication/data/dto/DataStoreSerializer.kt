@@ -13,7 +13,10 @@ import java.io.OutputStream
 /** SERIALIZER **/
 object DataStoreSerializer : Serializer<UserPreferences> {
 
-    override val defaultValue = UserPreferences()
+    override val defaultValue = UserPreferences(
+        updatePeriod = 15
+    )
+
     override suspend fun readFrom(input: InputStream): UserPreferences {
         try {
             return Json.decodeFromString(

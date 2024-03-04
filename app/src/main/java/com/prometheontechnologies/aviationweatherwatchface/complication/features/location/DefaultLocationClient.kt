@@ -12,6 +12,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.LocalDataRepository
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.location.dto.DefaultLocationClientData
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.location.dto.LocationClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.utils.hasLocationPermissions
@@ -19,13 +21,15 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.utils.no
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 
 class DefaultLocationClient(
     private val context: Context,
-    private val client: FusedLocationProviderClient
+    private val client: FusedLocationProviderClient,
+    private val repository: UserPreferencesRepository
 ) : LocationClient {
 
     companion object {
@@ -33,7 +37,7 @@ class DefaultLocationClient(
     }
 
     @SuppressLint("MissingPermission")
-    override fun getLocationUpdates(interval: Long): Flow<DefaultLocationClientData> {
+    override fun getLocationUpdates(): Flow<DefaultLocationClientData> {
         return callbackFlow {
             if (!context.hasLocationPermissions()) {
                 throw LocationClient.LocationNotAvailableException("Location permissions not granted")
@@ -77,15 +81,24 @@ class DefaultLocationClient(
                 throw LocationClient.LocationNotAvailableException(message)
             }
 
+            val interval =
+                LocalDataRepository.updateInterval.value ?: repository.readUserPreferences()
+                    .first().updatePeriod
+
+            Log.v(TAG, "Location update interval: $interval")
+
+            val minUpdate = interval / 2
+            val maxUpdateDelay = interval * 2
+
             val locationRequest = LocationRequest.Builder(
                 Priority.PRIORITY_HIGH_ACCURACY,
-                interval
+                TimeUnit.MINUTES.toMillis(interval.toLong())
             )
                 //.setWaitForAccurateLocation(false)
-                .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(45))
+                .setMinUpdateIntervalMillis(TimeUnit.SECONDS.toMillis(minUpdate.toLong()))
                 // set the min update distance to 2 nautical miles
                 .setMinUpdateDistanceMeters(3704f)
-                .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(2))
+                .setMaxUpdateDelayMillis(TimeUnit.MINUTES.toMillis(maxUpdateDelay.toLong()))
                 .build()
 
             val locationCallback = object : LocationCallback() {

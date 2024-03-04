@@ -21,7 +21,7 @@ fun Location?.toText(): String {
 
 interface LocationClient {
 
-    fun getLocationUpdates(interval: Long): Flow<DefaultLocationClientData>
+    fun getLocationUpdates(): Flow<DefaultLocationClientData>
 
     class LocationNotAvailableException(message: String) : Exception(message)
 }

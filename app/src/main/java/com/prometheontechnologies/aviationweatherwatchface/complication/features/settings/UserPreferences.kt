@@ -13,10 +13,12 @@ data class UserPreferences(
     var enableMilitary: Boolean = true,
     var isLeadingZeroTime: Boolean = true,
     // WEATHER
-    var weatherServiceUpdatePeriod: Long = 15,
+    var updatePeriod: Int,
     var initialLoad: Boolean = true,
 ) {
     companion object {
-        val defaultValue = UserPreferences()
+        val defaultValue = UserPreferences(
+            updatePeriod = 15
+        )
     }
 }

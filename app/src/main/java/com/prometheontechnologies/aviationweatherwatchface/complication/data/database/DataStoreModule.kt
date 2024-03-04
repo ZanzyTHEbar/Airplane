@@ -1,6 +1,7 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.data.database
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.dataStoreFile
@@ -42,6 +43,7 @@ object DataStoreManager {
         return dataStore.data.catch { exception ->
             // Handle exception, perhaps by emitting a default value
             if (exception is IOException) {
+                Log.e("DataStoreManager", "Error reading user preferences", exception)
                 emit(UserPreferences.defaultValue)
             } else {
                 throw exception

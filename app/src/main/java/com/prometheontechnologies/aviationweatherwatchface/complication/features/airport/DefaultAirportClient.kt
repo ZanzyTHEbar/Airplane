@@ -6,12 +6,15 @@ import android.location.Location
 import android.util.Log
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.Airport
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.AirportDAO
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.LocalDataRepository
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.location.dto.toText
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.weather.dto.WeatherClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.utils.hasLocationPermissions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -24,7 +27,8 @@ import kotlin.math.sqrt
 class DefaultAirportClient(
     private val context: Context,
     private val dao: AirportDAO,
-    private val weatherClient: WeatherClient
+    private val weatherClient: WeatherClient,
+    private val repository: UserPreferencesRepository
 ) : AirportClient {
 
     companion object {
@@ -103,7 +107,10 @@ class DefaultAirportClient(
             // Sort by smallest distance first
             it.second
         }
-        // TODO setup military filter to only be enabled if the setting is enabled
+
+        val militaryEnabled =
+            LocalDataRepository.militaryEnabled.value ?: repository.readUserPreferences()
+                .first().enableMilitary
 
         // filter to remove all airports that are closed, heliport, or have `Army` or `Air Force` or 'Navy' in the name
         val filteredAirports = closestAirports
@@ -111,6 +118,11 @@ class DefaultAirportClient(
                 it.first.type == "heliport"
             }
             .filterNot {
+
+                if (militaryEnabled) {
+                    return@filterNot false
+                }
+
                 it.first.name.contains("Army") || it.first.name.contains("Air Force") || it.first.name.contains(
                     "Navy"
                 )

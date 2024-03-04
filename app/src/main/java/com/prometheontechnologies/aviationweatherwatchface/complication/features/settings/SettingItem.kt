@@ -44,7 +44,7 @@ fun createSettingsList(): List<SettingItem> {
             else -> false
         }*/
 
-        if (propertyName == "weatherServiceUpdatePeriod" || propertyName == "initialLoad") {
+        if (propertyName == "updatePeriod" || propertyName == "initialLoad") {
             continue
         }
 

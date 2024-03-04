@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.concurrent.TimeUnit
 
 class LocationUpdateService : LifecycleService(), ServicesInterface {
     companion object {
@@ -62,7 +61,8 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
 
         locationClient = DefaultLocationClient(
             applicationContext,
-            LocationServices.getFusedLocationProviderClient(applicationContext)
+            LocationServices.getFusedLocationProviderClient(applicationContext),
+            repository
         )
 
         db = AirportsDatabase.getDatabase(applicationContext)
@@ -140,7 +140,7 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
         }
 
         locationClient
-            .getLocationUpdates(TimeUnit.MINUTES.toMillis(1))
+            .getLocationUpdates()
             .catch { e -> e.printStackTrace() }
             .onEach { locationData ->
 
