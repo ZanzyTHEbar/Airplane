@@ -1,4 +1,4 @@
-package com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.datastore
+package com.prometheontechnologies.aviationweatherwatchface.complication.data.dto
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer

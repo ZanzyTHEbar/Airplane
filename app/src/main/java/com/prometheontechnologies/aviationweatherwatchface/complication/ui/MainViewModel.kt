@@ -1,10 +1,14 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.ui
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.SettingItem
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.SettingsContextualActions
+import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.UserPreferences
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.createSettingsList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +16,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 
-class MainViewModel() : ViewModel() {
+
+class UserPreferencesViewModelFactory(private val repository: UserPreferencesRepository) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return MainViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+class MainViewModel(private val repository: UserPreferencesRepository) : ViewModel() {
 
     companion object {
         private val TAG = MainViewModel::class.java.simpleName
@@ -27,24 +43,23 @@ class MainViewModel() : ViewModel() {
 
     var contextualActions: SettingsContextualActions? = null
 
-    /*val complicationsSettings: StateFlow<UserPreferences> = dataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                emit(ComplicationsDataSerializer.defaultValue)
-            } else {
-                throw exception
-            }
-        }
-        .stateIn(
-            viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = ComplicationsDataSerializer.defaultValue
-        )*/
-
     private val _uiState = MutableStateFlow<SettingsUIState>(SettingsUIState.Initial)
     val uiState: StateFlow<SettingsUIState> = _uiState.asStateFlow()
 
+    private val _locationServicesButtonEnabled = MutableStateFlow(false)
+    private val _userPreferences = MutableStateFlow<UserPreferences?>(null)
+
+    //* Call from the MainActivity or compose UI
+    val locationServicesButtonEnabled: StateFlow<Boolean> =
+        _locationServicesButtonEnabled.asStateFlow()
+    val userPreferences: StateFlow<UserPreferences?> = _userPreferences.asStateFlow()
+
     init {
+        viewModelScope.launch {
+            repository.readUserPreferences().collect { preferences ->
+                _userPreferences.value = preferences
+            }
+        }
         loadSettings()
     }
 
@@ -68,15 +83,15 @@ class MainViewModel() : ViewModel() {
         }
     }
 
+    fun updateLocationServicesButton(enabled: Boolean) {
+        _locationServicesButtonEnabled.value = enabled
+    }
+
     fun updateSwitchesSetting(settingId: Int, checked: Boolean) {
         viewModelScope.launch {
             val currentState = _uiState.value
             if (currentState !is SettingsUIState.SettingsLoaded) return@launch
             val settingToUpdate = currentState.settings.find { it.id == settingId } ?: return@launch
-            Log.v(
-                TAG,
-                "Setting: $settingToUpdate - SettingId: ${settingToUpdate.id}"
-            )
 
             if (settingToUpdate.id != settingId && !settingToUpdate.enabled) {
                 return@launch
@@ -93,9 +108,19 @@ class MainViewModel() : ViewModel() {
                 }
             }
 
-            if (settingId == 0) handleLocationService(checked)
-
             updateSettingsUIState(SettingsUIState.SettingsLoaded(updatedSettings))
+
+            Log.v(
+                TAG,
+                "Setting: $updatedSetting"
+            )
+
+            when (settingId) {
+                0 -> handleLocationService(checked)
+                2 -> updateFlyMode(checked)
+                3 -> updateEnableMilitary(checked)
+                else -> {}
+            }
         }
     }
 
@@ -103,45 +128,62 @@ class MainViewModel() : ViewModel() {
         _uiState.value = newState
     }
 
-    private fun handleLocationService(checked: Boolean) {
+    private fun saveUserPreference(userPreference: UserPreferences) {
+        viewModelScope.launch {
+            repository.saveUserPreference(userPreference)
+        }
+    }
+
+    fun handleLocationService(checked: Boolean) = viewModelScope.launch {
         contextualActions?.toggleLocationService(checked)
+    }
+
+    fun scheduleWeatherUpdates(context: Context) {
+        contextualActions?.scheduleWeatherUpdates(context)
     }
 
     /***********************************************************************************************
      ***************************************** DataStore State Methods *****************************
      ***********************************************************************************************/
 
-    /*fun updateIsMilitaryTime(isMilitaryTime: Boolean) = viewModelScope.launch {
-        dataStore.updateData { currentSettings ->
-            currentSettings.copy(
-                isMilitaryTime = isMilitaryTime
-            )
-        }
-    }*/
+    private fun updateEnableMilitary(checked: Boolean) = viewModelScope.launch {
+        val currentState = _uiState.value
+        if (currentState !is SettingsUIState.SettingsLoaded) return@launch
+        val updatedUserPreferences = _userPreferences.value?.copy(
+            enableMilitary = checked
+        ) ?: return@launch
 
-    fun handleFlyMode(checked: Boolean) {
-        if (checked) {
-            // TODO: Setup the update interval to 2 minutes
-        } else {
-            // TODO: Setup the update interval to 15 minutes
-        }
+        saveUserPreference(updatedUserPreferences)
+    }
+
+    private fun updateFlyMode(checked: Boolean) = viewModelScope.launch {
+        val currentState = _uiState.value
+        if (currentState !is SettingsUIState.SettingsLoaded) return@launch
+        val interval = if (checked) 15 else 5
+        val updatedUserPreferences = _userPreferences.value?.copy(
+            flyingMode = checked,
+            weatherServiceUpdatePeriod = interval.toLong()
+        ) ?: return@launch
+
+        saveUserPreference(updatedUserPreferences)
     }
 
 
-    fun updateIntervalSetting(time: LocalTime) {
-        viewModelScope.launch {
-            val currentState = _uiState.value
-            if (currentState !is SettingsUIState.SettingsLoaded) return@launch
+    fun updateIntervalSetting(time: LocalTime) = viewModelScope.launch {
+        val currentState = _uiState.value
+        if (currentState !is SettingsUIState.SettingsLoaded) return@launch
 
-            // TODO: Setup parsing the time into an interval
-            // TODO: save the interval to the data store
-            // TODO: trigger snack-bar to show the user that the interval has been updated
+        val interval = time.hour * 60 + time.minute
 
-            Log.v(
-                TAG,
-                "Selected Option: $time"
-            )
-        }
+        val updatedUserPreferences = _userPreferences.value?.copy(
+            weatherServiceUpdatePeriod = interval.toLong()
+        ) ?: return@launch
 
+        saveUserPreference(updatedUserPreferences)
+
+        Log.v(
+            TAG,
+            "Selected Option: $time"
+        )
     }
 }

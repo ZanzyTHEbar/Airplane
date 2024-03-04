@@ -16,13 +16,15 @@ import androidx.wear.watchface.complications.data.TimeFormatComplicationText
 import androidx.wear.watchface.complications.datasource.ComplicationRequest
 import androidx.wear.watchface.complications.datasource.SuspendingComplicationDataSourceService
 import com.prometheontechnologies.aviationweatherwatchface.complication.R
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.UserPreferences
-import com.prometheontechnologies.aviationweatherwatchface.complication.features.settings.datastore.complicationsDataStore
 import com.prometheontechnologies.aviationweatherwatchface.complication.utils.presentComplicationViews
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
 
 class TimeComplicationService : SuspendingComplicationDataSourceService() {
+
+    private lateinit var repository: UserPreferencesRepository
 
     private fun openScreen(): PendingIntent? {
         val mClockIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
@@ -34,6 +36,11 @@ class TimeComplicationService : SuspendingComplicationDataSourceService() {
         )
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        repository = UserPreferencesRepository(applicationContext)
+    }
+
     override fun getPreviewData(type: ComplicationType): ComplicationData? {
         return this.presentComplicationViews(
             type,
@@ -43,11 +50,16 @@ class TimeComplicationService : SuspendingComplicationDataSourceService() {
         )
     }
 
+    override fun onComplicationActivated(complicationInstanceId: Int, type: ComplicationType) {
+        super.onComplicationActivated(complicationInstanceId, type)
+        repository = UserPreferencesRepository(applicationContext)
+    }
+
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
         val preferences: UserPreferences =
-            applicationContext.complicationsDataStore.data.first()
+            repository.readUserPreferences().first()
 
         val hour = LocalDateTime.now().hour
         val min = LocalDateTime.now().minute

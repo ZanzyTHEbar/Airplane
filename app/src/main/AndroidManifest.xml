@@ -56,7 +56,7 @@
         </service>
 
 
-        <receiver
+        <!--<receiver
             android:name=".utils.RebootReceiver"
             android:enabled="true"
             android:exported="true"
@@ -64,9 +64,9 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
-        <receiver android:name=".utils.WakeReceiver" />
+        <!-- <receiver android:name=".utils.WakeReceiver" />-->
 
         <service
             android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.DistanceComplicationService"
@@ -194,28 +194,6 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
-
-        <!--<activity
-            android:name=".ui.NotificationPermissionsDialogActivity"
-            android:exported="true"
-            android:label="@string/title_activity_notifications_permissions_dialog"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.DeviceDefault">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-
-        <activity
-            android:name=".features.settings.ui.AppManagerActivity"
-            android:exported="true"
-            android:label="@string/title_activity_app_manager_dialog"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.DeviceDefault">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>-->
 
     </application>
 

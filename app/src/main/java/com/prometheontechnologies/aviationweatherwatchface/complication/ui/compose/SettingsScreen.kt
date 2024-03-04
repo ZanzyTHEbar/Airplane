@@ -66,7 +66,6 @@ fun SettingsScreen(
             SettingsList(
                 settings = (uiState as MainViewModel.SettingsUIState.SettingsLoaded).settings,
                 viewModel = viewModel,
-                modifier = modifier,
                 navController = navController
             )
         }
@@ -80,7 +79,6 @@ fun SettingsScreen(
 fun SettingsList(
     settings: List<SettingItem>,
     viewModel: MainViewModel,
-    modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
 
@@ -102,7 +100,7 @@ fun SettingsList(
         }
         item { Spacer(modifier = Modifier.padding(8.dp)) }
         items(settings.size) { index ->
-            SettingItemView(index, settings, viewModel, navController)
+            SettingItemView(index, settings, viewModel)
         }
         item {
             Row(
@@ -141,11 +139,13 @@ fun SettingsList(
 fun SettingItemView(
     index: Int,
     settingsList: List<SettingItem>,
-    viewModel: MainViewModel,
-    navController: NavHostController
+    viewModel: MainViewModel
 ) {
     val setting = settingsList[index]
     if (!setting.enabled) return
+
+    val locationServiceButton by viewModel.locationServicesButtonEnabled.collectAsState()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -160,7 +160,7 @@ fun SettingItemView(
         when (setting.type) {
             SettingType.SWITCH -> {
                 Switch(
-                    checked = setting.checked,
+                    checked = if (setting.id == 0) locationServiceButton else setting.checked,
                     onCheckedChange = { checked ->
                         viewModel.updateSwitchesSetting(
                             settingId = setting.id,

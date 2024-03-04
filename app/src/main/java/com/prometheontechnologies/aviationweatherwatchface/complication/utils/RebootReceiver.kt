@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startForegroundService
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.dto.ServicesInterface
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.location.LocationUpdateService
 
@@ -28,15 +28,7 @@ class RebootReceiver : BroadcastReceiver() {
                         ServicesInterface.Companion.ActionType.START.toString()
                 }
 
-            val locationServiceIntentStop =
-                Intent(context, LocationUpdateService::class.java).apply {
-                    action =
-                        ServicesInterface.Companion.ActionType.STOP.toString()
-                }
-
-            ContextCompat.startForegroundService(context, locationServiceIntentStop)
-
-            ContextCompat.startForegroundService(context, locationServiceIntentStart)
+            startForegroundService(context, locationServiceIntentStart)
             Log.d(TAG, "${Intent.ACTION_BOOT_COMPLETED} received")
         }
     }

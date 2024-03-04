@@ -1,6 +1,9 @@
 package com.prometheontechnologies.aviationweatherwatchface.complication.features.settings
 
+import android.content.Context
+
 interface SettingsContextualActions {
-    fun toggleLocationService(toggle: Boolean)
+    suspend fun toggleLocationService(toggle: Boolean)
+    fun scheduleWeatherUpdates(context: Context)
     //val dataStore: DataStore<UserPreferences>
 }

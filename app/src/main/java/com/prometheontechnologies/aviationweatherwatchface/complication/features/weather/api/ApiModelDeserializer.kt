@@ -37,6 +37,30 @@ object DoubleSerializer : KSerializer<Double> {
     }
 }
 
+object IntSerializer : KSerializer<Int> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("WspdSerializer", PrimitiveKind.DOUBLE)
+
+    override fun serialize(encoder: Encoder, value: Int) {
+        encoder.encodeInt(value)
+    }
+
+    override fun deserialize(decoder: Decoder): Int {
+        // Obtain the decoder as JsonDecoder and then decode the JsonElement
+        return when (val element = (decoder as? JsonDecoder)?.decodeJsonElement()) {
+            is JsonPrimitive -> {
+                when {
+                    element.isString -> element.content.toIntOrNull() ?: 0
+                    element.doubleOrNull != null -> element.double.toInt()
+                    else -> 0
+                }
+            }
+
+            else -> 0
+        }
+    }
+}
+
 object StringSerializer : KSerializer<String> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("WspdSerializer", PrimitiveKind.STRING)

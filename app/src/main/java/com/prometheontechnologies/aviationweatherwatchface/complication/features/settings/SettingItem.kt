@@ -39,12 +39,12 @@ fun createSettingsList(): List<SettingItem> {
             else -> true
         }
 
-        val checked = when (propertyName) {
+        /*val checked = when (propertyName) {
             "locationServiceEnabled" -> true
             else -> false
-        }
+        }*/
 
-        if (propertyName == "weatherServiceUpdatePeriod") {
+        if (propertyName == "weatherServiceUpdatePeriod" || propertyName == "initialLoad") {
             continue
         }
 
@@ -67,7 +67,7 @@ fun createSettingsList(): List<SettingItem> {
                 title = title,
                 description = "Enable or disable $propertyName",
                 enabled = enabled,
-                checked = checked,
+                checked = false,
                 type = type
             )
         )

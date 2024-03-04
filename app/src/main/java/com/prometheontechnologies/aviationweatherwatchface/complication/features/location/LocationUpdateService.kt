@@ -5,10 +5,14 @@ import android.app.Notification
 import android.content.Intent
 import android.util.Log
 import android.widget.Toast
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.location.LocationServices
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.AirportsDatabase
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.LocalDataRepository
+import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.UserPreferencesRepository
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.dto.ServicesInterface
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.airport.AirportClient
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.airport.DefaultAirportClient
@@ -29,18 +33,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class LocationUpdateService : LifecycleService(), ServicesInterface {
     companion object {
         private val TAG = LocationUpdateService::class.java.simpleName
-        var isRunning = false
-
-        /*const val intentACTION =
-            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE"
-        const val intentEXTRA =
-            "com.prometheontechnologies.aviationweatherwatchface.complication.LOCATION_UPDATE_DATA"*/
     }
 
     private lateinit var db: AirportsDatabase
@@ -48,6 +47,7 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
     private lateinit var weatherClient: WeatherClient
     private lateinit var locationClient: LocationClient
     private lateinit var notificationHelper: NotificationHelper
+    private lateinit var repository: UserPreferencesRepository
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     override var serviceState: StateFlow<ServicesInterface.Companion.ServiceState>? = null
 
@@ -57,6 +57,8 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
 
     override fun onCreate() {
         super.onCreate()
+
+        repository = UserPreferencesRepository(applicationContext)
 
         locationClient = DefaultLocationClient(
             applicationContext,
@@ -77,7 +79,7 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
 
         notificationHelper = NotificationHelper(applicationContext)
 
-        /*lifecycleScope.launch {
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 serviceState?.onEach {
                     updateNotification()
@@ -86,7 +88,17 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
                     scheduleWakeAlarm()
                 }?.launchIn(serviceScope)
             }
-        }*/
+        }
+
+        val notification = updateNotification()
+
+        if (notification == null) {
+            Log.e(TAG, "Notification is null")
+            return
+        }
+
+        notificationHelper.notify(notification)
+        startForeground(NotificationHelper.NOTIFICATION_ID, notification)
     }
 
     override fun onDestroy() {
@@ -103,7 +115,6 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         intent?.let {
             when (it.action) {
                 ServicesInterface.Companion.ActionType.START.toString() -> start()
@@ -126,8 +137,6 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
             stateFlow.value.isPaused = false
             stateFlow.value.isRunning = true
             stateFlow.value.action = ServicesInterface.Companion.ActionType.ACTIVE
-
-            isRunning = true
         }
 
         locationClient
@@ -172,8 +181,8 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
             return
         }
 
-        startForeground(NotificationHelper.NOTIFICATION_ID, notification)
         notificationHelper.notify(notification)
+        startForeground(NotificationHelper.NOTIFICATION_ID, notification)
     }
 
     override fun pause() {
@@ -184,7 +193,7 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
             stateFlow.value.isPaused = true
             stateFlow.value.action = ServicesInterface.Companion.ActionType.PAUSE
         }
-        stopForeground(STOP_FOREGROUND_DETACH)
+        stopForeground(STOP_FOREGROUND_REMOVE)
     }
 
     override fun resume() {
@@ -204,8 +213,6 @@ class LocationUpdateService : LifecycleService(), ServicesInterface {
             stateFlow.value.isPaused = false
             stateFlow.value.isRunning = false
             stateFlow.value.action = ServicesInterface.Companion.ActionType.STOP
-
-            isRunning = false
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()

@@ -21,6 +21,7 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.features
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.TempComplicationService
 import com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.WindComplicationService
 
+
 fun Context.hasLocationPermissions(): Boolean {
     return ActivityCompat.checkSelfPermission(
         this,

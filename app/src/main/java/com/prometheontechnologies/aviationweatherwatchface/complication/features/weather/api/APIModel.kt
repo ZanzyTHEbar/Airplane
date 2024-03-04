@@ -60,47 +60,78 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class APIModel(
     val metar_id: Long,
+    @Serializable(with = StringSerializer::class)
     val icaoId: String,
+    @Serializable(with = StringSerializer::class)
     val receiptTime: String,
     val obsTime: Long,
+    @Serializable(with = StringSerializer::class)
     val reportTime: String,
+    @Serializable(with = DoubleSerializer::class)
     val temp: Double,
+    @Serializable(with = DoubleSerializer::class)
     val dewp: Double,
     @Serializable(with = DoubleSerializer::class)
     val wdir: Double,
+    @Serializable(with = IntSerializer::class)
     val wspd: Int,
+    @Serializable(with = IntSerializer::class)
     val wgst: Int?,
     @Serializable(with = StringSerializer::class)
     val visib: String,
+    @Serializable(with = DoubleSerializer::class)
     val altim: Double,
+    @Serializable(with = DoubleSerializer::class)
     val slp: Double?,
+    @Serializable(with = IntSerializer::class)
     val qcField: Int,
+    @Serializable(with = StringSerializer::class)
     val wxString: String?,
     @Serializable(with = DoubleSerializer::class)
     val presTend: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val maxT: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val minT: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val maxT24: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val minT24: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val precip: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val pcp3hr: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val pcp6hr: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val pcp24hr: Double?,
+    @Serializable(with = DoubleSerializer::class)
     val snow: Double?,
+    @Serializable(with = IntSerializer::class)
     val vertVis: Int?,
+    @Serializable(with = StringSerializer::class)
     val metarType: String,
+    @Serializable(with = StringSerializer::class)
     val rawOb: String,
+    @Serializable(with = IntSerializer::class)
     val mostRecent: Int,
+    @Serializable(with = DoubleSerializer::class)
     val lat: Double,
+    @Serializable(with = DoubleSerializer::class)
     val lon: Double,
+    @Serializable(with = IntSerializer::class)
     val elev: Int,
+    @Serializable(with = IntSerializer::class)
     val prior: Int,
+    @Serializable(with = StringSerializer::class)
     val name: String,
     val clouds: List<Cloud>
 )
 
 @Serializable
 data class Cloud(
+    @Serializable(with = StringSerializer::class)
     val cover: String,
+    @Serializable(with = IntSerializer::class)
     val base: Int
 )

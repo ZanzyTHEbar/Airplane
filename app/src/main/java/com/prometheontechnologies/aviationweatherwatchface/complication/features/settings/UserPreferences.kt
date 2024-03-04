@@ -5,13 +5,18 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserPreferences(
     // must always be the first field
-    val locationServiceEnabled: Boolean = true,
+    var locationServiceEnabled: Boolean = true,
     // User
-    val notificationsEnabled: Boolean = false,
-    val flyingMode: Boolean = false,
+    var notificationsEnabled: Boolean = false,
+    var flyingMode: Boolean = false,
     // TIME
-    val enableMilitary: Boolean = true,
-    val isLeadingZeroTime: Boolean = true,
+    var enableMilitary: Boolean = true,
+    var isLeadingZeroTime: Boolean = true,
     // WEATHER
-    val weatherServiceUpdatePeriod: Long = 15
-)
+    var weatherServiceUpdatePeriod: Long = 15,
+    var initialLoad: Boolean = true,
+) {
+    companion object {
+        val defaultValue = UserPreferences()
+    }
+}
