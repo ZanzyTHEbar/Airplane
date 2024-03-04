@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowCircleRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.wear.compose.material.CircularProgressIndicator
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material3.AppCard
 import androidx.wear.compose.material3.ListHeader
@@ -117,12 +121,12 @@ fun SettingsList(
                         .fillMaxWidth(),
                     enabled = true,
                     icon = {
-                        Image(
-                            painter = painterResource(
-                                id = android.R.drawable.ic_menu_more
-                            ),
-                            contentDescription = "More Options",
-                            modifier = Modifier.size(24.dp),
+                        Icon(
+                            imageVector = Icons.Rounded.ArrowCircleRight,
+                            contentDescription = "Triggers location permission request",
+                            modifier = Modifier
+                                .size(24.dp)
+                                .wrapContentSize(align = Alignment.Center)
                         )
                     }
                 )
