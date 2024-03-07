@@ -24,17 +24,6 @@ class DistanceComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        /*// we pass the complication id, so we can only handle the request for the complication id
-        val thisDataSource = ComponentName(this, javaClass)
-        val complicationPendingIntent = ReceiverService.getToggleIntent(
-            this,
-            thisDataSource,
-            request.complicationInstanceId
-        )*/
-
-        /*val distance =
-            applicationContext.complicationsDataStore.data.first().locationServiceDataStore.distance*/
-
         val distance = LocalDataRepository.locationData.value?.distance ?: 0.0
 
         val nauticalMiles = distance / NAUTICAL_MILES_CONSTANT

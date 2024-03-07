@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.prometheontechnologies.aviationweatherwatchface.complication.data.database.LocalDataRepository
-import com.prometheontechnologies.aviationweatherwatchface.complication.features.weather.dto.WeatherData
+import com.prometheontechnologies.aviationweatherwatchface.complication.features.weather.api.WeatherAPIModel
 import com.prometheontechnologies.aviationweatherwatchface.complication.utils.requestComplicationUpdate
 import kotlinx.coroutines.flow.first
 
@@ -30,7 +30,7 @@ class WeatherUpdateWorker(
         }
     }
 
-    private fun updateData(weatherService: WeatherData) {
+    private fun updateData(weatherService: WeatherAPIModel) {
         LocalDataRepository.updateWeatherData(weatherService)
         applicationContext.requestComplicationUpdate(true)
     }

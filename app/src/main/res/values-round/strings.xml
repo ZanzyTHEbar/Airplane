@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (C) 2021 The Android Open Source Project
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-          http://www.apache.org/licenses/LICENSE-2.0
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
 <resources>
     <string name="distance_complication_name">Aviation Weather Distance</string>
     <string name="ident_complication_name">Aviation Weather IDENT</string>
     <string name="temp_complication_name">Aviation Weather Temperature</string>
     <string name="time_complication_name">Aviation Weather Zulu Time</string>
     <string name="wind_complication_name">Aviation Weather Wind</string>
-    <string name="title_activity_app_manager_dialog">Avaition Weather Manager</string>
+    <string name="title_activity_app_manager_dialog">Aviation Weather Manager</string>
+    <string name="freezing_complication_name">Aviation Weather Freezing Layer</string>
+    <string name="density_complication_name">Aviation Weather Density Altitude</string>
+    <string name="pressure_complication_name">Aviation Weather Pressure</string>
+    <string name="visibility_complication_name">Aviation Weather Visibility</string>
+    <string name="cloud_complication_name">Aviation Weather Cloud Layer</string>
     <string name="state_start_text">START</string>
     <string name="state_active_text">ACTIVE</string>
     <string name="state_pause_text">PAUSE</string>

@@ -25,8 +25,8 @@ class WindComplicationService : SuspendingComplicationDataSourceService() {
 
         val dataStore = LocalDataRepository.weatherData.value
 
-        val windSpeed = dataStore?.windSpeed ?: 0
-        val windDirection = dataStore?.windDirection ?: 0.0
+        val windSpeed = dataStore?.wspd ?: 0
+        val windDirection = dataStore?.wdir ?: 0.0
 
         val text = "${windSpeed}kts/${windDirection}°"
 

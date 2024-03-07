@@ -33,7 +33,7 @@ class TempComplicationService : SuspendingComplicationDataSourceService() {
             dataStore?.temp ?: 0.0
 
         val dewPoint =
-            dataStore?.dewPt ?: 0.0
+            dataStore?.dewp ?: 0.0
 
         val text = "${temp}/${dewPoint}${UNIT}"
 

@@ -56,7 +56,7 @@ class FreezingLevelComplicationService : SuspendingComplicationDataSourceService
     }
 
     companion object {
-        private val TAG = DistanceComplicationService::class.java.simpleName
+        private val TAG = FreezingLevelComplicationService::class.java.simpleName
         private const val NAUTICAL_MILES_CONSTANT = 1.852
         private const val UNIT = "FT"
         private const val description = "Freezing Level"

@@ -58,7 +58,7 @@ import kotlinx.serialization.Serializable
  **/
 
 @Serializable
-data class APIModel(
+data class WeatherAPIModel(
     val metar_id: Long,
     @Serializable(with = StringSerializer::class)
     val icaoId: String,
@@ -134,4 +134,18 @@ data class Cloud(
     val cover: String,
     @Serializable(with = IntSerializer::class)
     val base: Int
+)
+
+@Serializable
+data class MetarData(
+    val airportCode: String,
+    val dayOfMonth: Int,
+    val timeZulu: String,
+    val wind: String,
+    val visibility: String,
+    val skyCondition: List<String>,
+    val temperatureC: Int,
+    val dewPointC: Int,
+    val altimeterInHg: Double,
+    val seaLevelPressureMb: Double
 )

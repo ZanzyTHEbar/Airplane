@@ -46,8 +46,13 @@
     <string name="time_complication_name">Aviation Weather Zulu Time</string>
     <string name="wind_complication_name">Aviation Weather Wind</string>
     <string name="title_activity_location_permissions_dialog">Aviation Weather Manager</string>
-    <string name="title_activity_notifications_permissions_dialog">Aviation Weather Notifications Dialog</string>
+    <string name="freezing_complication_name">Aviation Weather Freezing Layer</string>
+    <string name="density_complication_name">Aviation Weather Density Altitude</string>
+    <string name="pressure_complication_name">Aviation Weather Pressure</string>
+    <string name="visibility_complication_name">Aviation Weather Visibility</string>
+    <string name="cloud_complication_name">Aviation Weather Cloud Layer</string>
     <string name="title_activity_app_manager_dialog">Aviation Weather Manager</string>
+    <string name="title_activity_notifications_permissions_dialog">Aviation Weather Notifications Dialog</string>
     <string name="state_start_text">START</string>
     <string name="state_active_text">ACTIVE</string>
     <string name="state_pause_text">PAUSE</string>

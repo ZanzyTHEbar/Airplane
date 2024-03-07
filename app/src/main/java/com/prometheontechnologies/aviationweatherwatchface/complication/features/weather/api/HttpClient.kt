@@ -43,12 +43,12 @@ interface WeatherApi {
         @Query("ids") ids: String?,
         @Query("taf") taf: Boolean?,
         @Query("format") format: String
-    ): List<APIModel>
+    ): List<WeatherAPIModel>
 
     @GET("/api/data/metar")
     suspend fun getMetarDetailsBBOX(
         @Query("taf") taf: Boolean?,
         @Query("format") format: String,
         @Query("bbox") bbox: String
-    ): List<APIModel>
+    ): List<WeatherAPIModel>
 }

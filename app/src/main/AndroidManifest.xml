@@ -44,7 +44,6 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-
         <service
             android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.location.LocationUpdateService"
             android:enabled="true"
@@ -54,7 +53,6 @@
                 <action android:name="com.example.ACTION_START_LOCATION_UPDATES" />
             </intent-filter>-->
         </service>
-
 
         <!--<receiver
             android:name=".utils.RebootReceiver"
@@ -90,7 +88,7 @@
             android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.FreezingLevelComplicationService"
             android:exported="true"
             android:icon="@drawable/ic_temp"
-            android:label="@string/distance_complication_name"
+            android:label="@string/freezing_complication_name"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
                 <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
@@ -163,6 +161,78 @@
             android:exported="true"
             android:icon="@drawable/wind_foreground"
             android:label="@string/wind_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.DensityAltitudeComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_flight_takoff_foreground"
+            android:label="@string/density_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.PressureComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_pressure_foreground"
+            android:label="@string/pressure_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.VisibilityComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_visibility_foreground"
+            android:label="@string/visibility_complication_name"
+            android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
+            <intent-filter>
+                <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
+                android:value="120" />
+            <meta-data
+                android:name="android.support.wearable.complications.SUPPORTED_TYPES"
+                android:value="SHORT_TEXT,LONG_TEXT" />
+        </service>
+
+        <service
+            android:name="com.prometheontechnologies.aviationweatherwatchface.complication.features.complications.CloudLayerComplicationService"
+            android:exported="true"
+            android:icon="@drawable/ic_cloud_foreground"
+            android:label="@string/cloud_complication_name"
             android:permission="com.google.android.wearable.permission.BIND_COMPLICATION_PROVIDER">
             <intent-filter>
                 <action android:name="android.support.wearable.complications.ACTION_COMPLICATION_UPDATE_REQUEST" />
