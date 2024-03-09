@@ -138,14 +138,36 @@ data class Cloud(
 
 @Serializable
 data class MetarData(
-    val airportCode: String,
-    val dayOfMonth: Int,
-    val timeZulu: String,
-    val wind: String,
-    val visibility: String,
-    val skyCondition: List<String>,
-    val temperatureC: Int,
-    val dewPointC: Int,
-    val altimeterInHg: Double,
-    val seaLevelPressureMb: Double
-)
+    val airportCode: String?,
+    val dayOfMonth: Int?,
+    val timeZulu: String?,
+    val wind: String?,
+    val windSpeed: Int?,
+    val windDirection: Int?,
+    val windGust: Int?,
+    val visibility: String?,
+    val skyCondition: List<String>?,
+    val temperatureC: Int?,
+    val dewPointC: Int?,
+    val altimeterInHg: Double?,
+    val seaLevelPressureMb: Double?
+) {
+    fun toText(): String {
+        return "METAR for $airportCode\n" +
+                "Time: $timeZulu\n" +
+                "Day of month: $dayOfMonth\n" +
+
+                if (wind != null) {
+                    "Wind: $wind\n"
+                } else {
+                    "Wind speed: ${windSpeed}KT\n" +
+                            "Wind direction: ${windDirection}°\n" +
+                            "Wind gust: ${windGust}KT\n"
+                } +
+                "Visibility: $visibility\n" +
+                "Sky condition: ${skyCondition?.joinToString(", ")}\n" +
+                "Temperature: $temperatureC°C\n" +
+                "Dew point: $dewPointC°C\n" +
+                "Altimeter: ${altimeterInHg}inHg / ${seaLevelPressureMb}mb"
+    }
+}

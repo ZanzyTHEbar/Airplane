@@ -15,7 +15,7 @@ import kotlinx.serialization.json.intOrNull
 
 object DoubleSerializer : KSerializer<Double> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("WspdSerializer", PrimitiveKind.DOUBLE)
+        PrimitiveSerialDescriptor("DoubleSerializer", PrimitiveKind.DOUBLE)
 
     override fun serialize(encoder: Encoder, value: Double) {
         encoder.encodeDouble(value)
@@ -23,12 +23,13 @@ object DoubleSerializer : KSerializer<Double> {
 
     override fun deserialize(decoder: Decoder): Double {
         // Obtain the decoder as JsonDecoder and then decode the JsonElement
+        //return decoder.decodeDouble()
         return when (val element = (decoder as? JsonDecoder)?.decodeJsonElement()) {
             is JsonPrimitive -> {
                 when {
                     element.isString -> element.content.toDoubleOrNull() ?: 0.0
                     element.intOrNull != null -> element.int.toDouble()
-                    else -> 0.0
+                    else -> element.content.toDoubleOrNull() ?: 0.0
                 }
             }
 
@@ -39,7 +40,7 @@ object DoubleSerializer : KSerializer<Double> {
 
 object IntSerializer : KSerializer<Int> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("WspdSerializer", PrimitiveKind.DOUBLE)
+        PrimitiveSerialDescriptor("IntSerializer", PrimitiveKind.INT)
 
     override fun serialize(encoder: Encoder, value: Int) {
         encoder.encodeInt(value)
@@ -52,7 +53,7 @@ object IntSerializer : KSerializer<Int> {
                 when {
                     element.isString -> element.content.toIntOrNull() ?: 0
                     element.doubleOrNull != null -> element.double.toInt()
-                    else -> 0
+                    else -> element.content.toIntOrNull() ?: 0
                 }
             }
 
@@ -63,7 +64,7 @@ object IntSerializer : KSerializer<Int> {
 
 object StringSerializer : KSerializer<String> {
     override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("WspdSerializer", PrimitiveKind.STRING)
+        PrimitiveSerialDescriptor("StringSerializer", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: String) {
         encoder.encodeString(value)

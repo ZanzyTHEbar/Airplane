@@ -25,12 +25,11 @@ class VisibilityComplicationService : SuspendingComplicationDataSourceService() 
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
         val visibility = LocalDataRepository.metarData.value?.visibility ?: return null
-        val text = "$visibility$UNIT"
 
         return this.presentComplicationViews(
             request.complicationType,
             description,
-            text,
+            visibility,
             R.drawable.ic_visibility_foreground
         )
     }
@@ -47,7 +46,6 @@ class VisibilityComplicationService : SuspendingComplicationDataSourceService() 
 
     companion object {
         private val TAG = VisibilityComplicationService::class.java.simpleName
-        private const val UNIT = "SM"
         private const val description = "Visibility"
         private const val placeHolder = "10+"
     }

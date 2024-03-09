@@ -24,16 +24,13 @@ class TempComplicationService : SuspendingComplicationDataSourceService() {
     override suspend fun onComplicationRequest(request: ComplicationRequest): ComplicationData? {
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
-        /*val dataStore =
-            applicationContext.complicationsDataStore.data.first().weatherServiceDataStore*/
-
-        val dataStore = LocalDataRepository.weatherData.value
+        val dataStore = LocalDataRepository.weatherData.value ?: return null
 
         val temp =
-            dataStore?.temp ?: 0.0
+            dataStore.temp
 
         val dewPoint =
-            dataStore?.dewp ?: 0.0
+            dataStore.dewp
 
         val text = "${temp}/${dewPoint}${UNIT}"
 

@@ -24,9 +24,15 @@ class FreezingLevelComplicationService : SuspendingComplicationDataSourceService
         Log.d(TAG, "onComplicationRequest() id: ${request.complicationInstanceId}")
 
         val groundTemp = LocalDataRepository.weatherData.value?.temp ?: 0.0
-        val height = calculateHeightForTemperature(groundTemp, 0.0)
+        val height = calculateHeightForTemperature(groundTemp)
 
-        val text = "${height.toInt()}${UNIT}"
+        if (height.isNaN()) return null
+
+        val text = if (height.toInt() <= 0) {
+            "Surface"
+        } else {
+            "${height.toInt()}${UNIT}"
+        }
 
         return this.presentComplicationViews(
             request.complicationType,
@@ -48,11 +54,18 @@ class FreezingLevelComplicationService : SuspendingComplicationDataSourceService
         super.onComplicationDeactivated(complicationInstanceId)
     }
 
-    private fun calculateHeightForTemperature(T_sfc: Double, T_height: Double): Double {
+    private fun calculateHeightForTemperature(T_sfc: Double, T_freezing: Double = 0.0): Double {
         // Constants
-        val conversionFactor = 0.002
-        // Calculating height using the given formula
-        return (T_sfc - T_height) / conversionFactor
+        val lapseRate = 0.0065 // Temperature decrease in °C per meter
+        val metersToFeet = 3.28084 // Conversion factor from meters to feet
+
+        // Calculating height difference required for temperature to decrease to the freezing point in meters
+        val heightInMeters = (T_sfc - T_freezing) / lapseRate
+
+        // Convert height from meters to feet
+        val heightInFeet = heightInMeters * metersToFeet
+
+        return heightInFeet
     }
 
     companion object {

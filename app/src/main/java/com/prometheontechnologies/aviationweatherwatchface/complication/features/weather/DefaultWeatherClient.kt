@@ -13,6 +13,13 @@ import kotlinx.coroutines.flow.callbackFlow
 
 class DefaultWeatherClient(private val context: Context) : WeatherClient {
 
+    private data class WindData(
+        val direction: Int? = null,
+        val speed: Int? = null,
+        val gust: Int? = null,
+        val wind: String? = null
+    )
+
     companion object {
         private val TAG = DefaultWeatherClient::class.java.simpleName
     }
@@ -56,84 +63,122 @@ class DefaultWeatherClient(private val context: Context) : WeatherClient {
         }
     }
 
+    // Helper functions to parse METAR data
+    private fun parseTemperature(tempStr: String): Int {
+        return if (tempStr.startsWith("M")) {
+            -tempStr.substring(1).toIntOrNull()!!
+        } else {
+            tempStr.toIntOrNull()!!
+        }
+    }
+
+    private fun processWindPart(windPart: String): WindData {
+        val windRegex = Regex("^(\\d{3})(\\d{2})(G(\\d{2}))?KT$")
+        val matchResult = windRegex.find(windPart)
+
+        if (matchResult != null) {
+            if (matchResult.value == "00000KT") return WindData(wind = "Calm")
+            val (direction, speed, _, gust) = matchResult.destructured
+            val windDirection = direction.toInt() // Convert to integer
+            val windSpeed = speed.toInt() // Convert to integer
+            val windGust = gust.toIntOrNull() // Convert to integer if present, null otherwise
+
+
+            return WindData(windDirection, windSpeed, windGust)
+        } else {
+            throw IllegalArgumentException("Invalid wind data format")
+        }
+    }
+
     private fun parseMetar(metarString: String): Result<MetarData> {
-        val parts = metarString.split(" ").filter { it.isNotEmpty() }
+        val parts = metarString.split(" ").filter { it.isNotEmpty() /*&& it != "AUTO"*/ }
 
         if (parts.size < 9) return Result.failure(WeatherClient.WeatherNotAvailableException("METAR string is too short."))
 
         return try {
-            val airportCode = parts[0]
+            var windData: WindData? = null
+            var visibility: String? = null
+            val skyConditions = mutableListOf<String>()
+            var temperatureC: Int? = null
+            var dewPointC: Int? = null
+            var altimeterInHg: Double? = null
+            var seaLevelPressureMb: Double? = null
 
-            /*val dayOfMonth = parts[1].substring(0, 2).toInt().takeIf { it in 1..31 }
-                ?: throw WeatherClient.WeatherNotAvailableException("Invalid day of month")*/
-            /* val timeZulu = parts[1].substring(2).takeIf { it.length == 4 }
-                ?: throw WeatherClient.WeatherNotAvailableException("Invalid time format")*/
+
+            val airportCode = parts[0]
 
             val timePart = parts.find { it.endsWith("Z") }
                 ?: throw WeatherClient.WeatherNotAvailableException("Time part not found")
-
-            // Validate the format further if necessary
             if (timePart.length != 7) throw WeatherClient.WeatherNotAvailableException("Invalid time format")
 
             val dayOfMonth = timePart.substring(0, 2).toIntOrNull()
                 ?: throw IllegalArgumentException("Invalid day of month")
-            val timeZulu = timePart.substring(2, 6) // No need to convert to Int
+            val timeZulu = timePart.substring(2, 6)
 
-            val wind = parts[2]
-            val visibility = parts[3]
+            parts.forEach { part ->
+                try {
+                    when {
+                        part.matches(Regex("^(\\d{5}KT|\\d{5}G\\d{2}KT)$")) -> {
+                            windData = processWindPart(part)
+                        }
 
-            val skyConditionIndices =
-                parts
-                    .indices
-                    .filter { i ->
-                        parts[i]
-                            .matches(Regex("^(FEW|SCT|BKN|OVC)[0-9]{3}$"))
+                        part.matches(Regex("^[0-9]+SM$")) -> {
+                            visibility = part/*.replace("SM", "")*/
+                        }
+
+                        part.matches(Regex("^(FEW|SCT|BKN|OVC)[0-9]{3}$")) -> {
+                            if (part.isEmpty()) throw WeatherClient.WeatherNotAvailableException("Sky condition not found")
+                            skyConditions.add(part)
+                        }
+
+                        part.matches(Regex("^M?[0-9]{2}/M?[0-9]{2}$")) -> {
+                            val tempDewSplit = part.split("/")
+                            if (tempDewSplit.size != 2) throw WeatherClient.WeatherNotAvailableException(
+                                "Invalid temperature/dew point format"
+                            )
+
+                            temperatureC = parseTemperature(tempDewSplit[0])
+                            dewPointC = parseTemperature(tempDewSplit[1])
+                        }
+
+                        part.matches(Regex("^A[0-9]{4}$")) -> {
+                            altimeterInHg = part.substring(1).toDoubleOrNull()?.div(100)
+                                ?: throw WeatherClient.WeatherNotAvailableException("Invalid altimeter value")
+                        }
+
+                        part.startsWith("SLP") -> {
+                            val slp = part.substring(3).toDoubleOrNull()
+                                ?: throw WeatherClient.WeatherNotAvailableException("Invalid SLP value")
+                            seaLevelPressureMb = slp / 10 + 1000
+                        }
                     }
-            val skyCondition = skyConditionIndices.map { parts[it] }
+                } catch (e: IllegalArgumentException) {
+                    println("Error processing data: ${e.message}")
+                    // Handle error or fallback
+                }
+            }
 
-            val tempDew = parts[6].split("/")
-            if (tempDew.size != 2) throw WeatherClient.WeatherNotAvailableException("Invalid temperature/dew point format")
-            val temperatureC = tempDew[0].toInt()
-            val dewPointC = tempDew[1].toInt()
-
-            // Assuming parts[7] contains the altimeter setting starting with 'A'
-            val altimeterSettingPart = parts.find { it.startsWith("A") }
-                ?: throw WeatherClient.WeatherNotAvailableException("Altimeter setting not found")
-
-            // Extract the numeric part and convert to the actual altimeter setting
-            val altimeterInHg = altimeterSettingPart.substring(1).toDoubleOrNull()?.div(100)
-                ?: throw WeatherClient.WeatherNotAvailableException("Invalid altimeter setting format")
-
-            // Validate the altimeter setting
-            if (altimeterInHg !in 28.0..32.0) throw WeatherClient.WeatherNotAvailableException("Altimeter setting out of expected range: $altimeterInHg")
-
-            /*val altimeterInHg = parts[7].substring(1).toDouble().takeIf { it in 28.0..32.0 }
-                ?: throw WeatherClient.WeatherNotAvailableException("Invalid altimeter setting")*/
-
-            val slpIndex = parts.indexOfFirst { it.startsWith("SLP") }
-            val seaLevelPressureMb = if (slpIndex != -1) {
-                val slp =
-                    parts[slpIndex].substring(3).toDoubleOrNull()
-                        ?: throw WeatherClient.WeatherNotAvailableException(
-                            "Invalid SLP value"
-                        )
-                slp / 10 + 1000
-            } else 0.0
-
-            Result.success(
-                MetarData(
-                    airportCode,
-                    dayOfMonth,
-                    timeZulu,
-                    wind,
-                    visibility,
-                    skyCondition,
-                    temperatureC,
-                    dewPointC,
-                    altimeterInHg,
-                    seaLevelPressureMb
-                )
+            if (altimeterInHg != null && (altimeterInHg!! !in 28.0..32.0)) {
+                throw WeatherClient.WeatherNotAvailableException("Altimeter setting out of expected range: $altimeterInHg")
+            }
+            val metarData = MetarData(
+                airportCode,
+                dayOfMonth,
+                timeZulu,
+                windData?.wind,
+                windData?.speed,
+                windData?.direction,
+                windData?.gust,
+                visibility,
+                skyConditions,
+                temperatureC,
+                dewPointC,
+                altimeterInHg,
+                seaLevelPressureMb
             )
+
+            Log.v(TAG, "Parsed METAR: ${metarData.toText()}")
+            Result.success(metarData)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -16,13 +16,8 @@ import com.prometheontechnologies.aviationweatherwatchface.complication.utils.No
 
 /**
  * Complications:
- * TODO: Density Altitude complication (individual feet)
- * TODO: Cloud Layer complication
- * TODO: Visibility complication (statute miles)
- * TODO: Pressure complication (inches of mercury)
- * Preferences:
- * TODO: Flying mode - toggle between flying and driving mode, set an interval for the weather updates and the location updates (in minutes) based on the mode.
- * TODO: Force and update after sleep mode (if the watch is in sleep mode for a long time, force an update when it wakes up).
+ * TODO: Fix cloudlayer complications styling
+ * TODO: Add onclick for ident that opens a screen with the full METAR report.
  */
 
 class MainApp : Application() {
